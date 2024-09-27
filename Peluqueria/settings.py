@@ -26,7 +26,11 @@ SECRET_KEY = 'django-insecure-f3aqt&8z$@**0pez#%b=tx5nv64g#c1=m$r%$1h353_7x68-#^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'tesis-production-e7c6.up.railway.app',  # El dominio específico que Railway te ha asignado
+    'localhost',  # Para desarrollo local
+    '127.0.0.1',  # También para desarrollo local
+]
 
 
 # Application definition
