@@ -1,0 +1,256 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-uac-compatible" content="IE-edge">  <!--Se usa para renderizar el sitio web -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salon de belleza</title>
+
+ 
+    
+    <!-- Rutas a los archivos estáticos -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'estilo1.css' %}">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <header class="header">
+
+        <nav class="svg">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+                <path fill="#ffffff" fill-opacity="1" d="M0,96L48,133.3C96,171,192,245,288,277.3C384,309,480,299,576,282.7C672,267,768,245,864,224C960,203,1056,181,1152,170.7C1248,160,1344,160,1392,160L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            </svg>
+        </nav>
+
+        <div class="menu containerDos" id="inicio.html">
+
+            <a href="#inicio.html" class="Logo">
+                <img src="{% static 'HairStudiodos.png' %}" alt="">
+            </a>
+            <input type="checkbox" id="menu">
+            <label for="menu">
+                <img src="{% static 'menu.png' %}" class="menu-icono" alt="">
+            </label>
+
+            <nav class="navbar">
+                <ul class="menuhorizontal">
+                    <li><a href="#inicio.html">Inicio</a></li>
+                    <li><a href="#combos.html">Combos</a></li>
+                    <li><a href="#servicios.html">Servicios</a></li>
+                    <li><a href="#sobrenosotros.html">Nosotros</a></li>
+                    <li><a href="#contactos.html">Contactos</a></li>
+                    <div class="profile">
+                        <ul class="profile-link">
+                            <li><a href="{% url 'login' %}"><ini class='bx bxs-user-circle icon'></ini></a></li>
+                        </ul>
+                    </div>
+                </ul>
+            </nav>
+        </div>
+
+        <div class="header-content container">
+            <div class="header-txt">
+                <h1>Bienvenido <br> <span> a Celia's Hair Studio </span></h1>
+                <p>Donde la belleza cobra vida. Explora nuestros servicios y experimenta el arte de resaltar tu mejor versión con cada detalle.</p>
+                <div class="buttons">
+                    <a href="#" class="btn-1">Agenda ahora</a>
+                    <a href="#" class="btn-1">Ver menú</a>
+                </div>
+            </div>
+            <div class="header-img">
+                <img src="{% static 'segundaimagen.png' %}" alt="">
+            </div>
+        </div>
+    </header>
+    <section class="menu-pl container" id="combos.html">
+        <h2>Combos <span>Especiales</span></h2>
+        <div class="general-content">
+            <div class="general-txt">
+                <img src="{% static 'Hair Studio.png' %}" alt="">
+                <h3>Combo 1</h3>
+                <p>
+                    - Lavado tradicional 30.000 <br>
+                    - Corte              30.000 <br>
+                    - Brushing           35.000 <br>
+                </p>
+                <div class="Precios">
+                    <span>95.000</span>
+                    <a href="#" class="btn-2">Solicitar</a>
+                </div>
+            </div>
+    
+            <div class="general-txt">
+                <img src="{% static 'Tratamientos.jpg' %}" alt="">
+                <h3>Combo 2</h3>
+                <p>
+                   - Lavado con Tratamiento  60.000 <br>
+                   - Brushing y ondas 60.000 <br>
+                   - Mano y pies tradicional 60.000 <br>
+                </p>
+                <div class="Precios">
+                    <span>180.000</span>
+                    <a href="#" class="btn-2">Solicitar</a>
+                </div>
+            </div>
+    
+            <div class="general-txt">
+                <img src="{% static 'manos.jpg' %}" alt="">
+                <h3>Combo 3</h3>
+                <p>
+                    - Manicura y <br>
+                    - Esmaltado semipermanente 55.000 <br>
+                    - Pedicura tradicional     40.000 <br>
+                </p>
+                <div class="Precios">
+                    <span>95.000</span>
+                    <a href="#" class="btn-2">Solicitar</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="about">
+        <div class="about-content container" id="servicios.html">
+            <div class="about-txt">
+                <h2>Servicios Especiales <br> <span>Paquete de Fiesta</span></h2>
+                <p>
+                    Peinado y maquillaje para eventos especiales
+                </p>
+                <div class="Hamburguer">
+                    <a href="#" class="btn-2">Solicitar</a>
+                </div>
+            </div>
+    
+            <div class="about-img">
+                <img src="{% static 'Primeraimagen.png' %}" alt="">
+            </div>
+        </div>
+    </section>
+    
+
+    <section class="menu-pl container">
+        <h2>Nuestros <span>Servicios Top</span></h2>
+    
+        <div class="general-content">
+            <div class="general-txt">
+                <img src="{% static 'lavadodos.jpg' %}" alt="">
+                <h3>Lavados</h3>
+                <p>
+                   - Lavado Tradicional <br>
+                   - Lavado semi di lino 
+                </p>
+            </div>
+    
+            <div class="general-txt">
+                <img src="{% static 'cortedecabellodos.jpg' %}" alt="">
+                <h3>Cortes de Cabello</h3>
+                <p>
+                    - Corte en Capas <br>
+                    - Corte recto 
+                </p>
+            </div>
+    
+            <div class="general-txt">
+                <img src="{% static 'maquillaje.jpg' %}" alt="">
+                <h3>Maquillajes</h3>
+                <p>
+                    - Maquillaje Básico <br>
+                    - Maquillaje Social <br>
+                    - Maquillaje de novia <br>
+                    - Aplicación de pestañas <br>
+                    - Perfilado de cejas 
+                </p>
+            </div>
+    
+            <div class="general-txt">
+                <img src="{% static 'Esmaltados.jpg' %}" alt="">
+                <h3>Manicura y Pedicura</h3>
+                <p>
+                    - Manicura más esmaltado tradicional <br>
+                    - Manicura más esmaltado semi <br>
+                    - Pedicura más esmaltado tradicional <br>
+                    - Esculpidas con acrílico 
+                </p>
+            </div>
+    
+            <div class="general-txt">
+                <img src="{% static 'peinado.jpg' %}" alt="">
+                <h3>Peinados</h3>
+                <p>
+                    - Brushing <br>
+                    - Brushing más planchita <br>
+                    - Brushing más ondas <br>
+                    - Ondas al agua <br>
+                    - Coletas 
+                </p>
+            </div>
+    
+            <div class="general-txt">
+                <img src="{% static 'Tratamientosdos.jpg' %}" alt="">
+                <h3>Tratamientos Capilares</h3>
+                <p>
+                    - Baño de nutrición semi di lino <br>
+                    - Baño nutrición Nature <br>
+                    - Efecto espejo <br>
+                    - Hidratación 
+                </p>
+            </div>
+        </div>
+    </section>
+    <section class="info container" id="sobrenosotros.html">
+        <div class="info-img">
+            <img src="{% static 'ultimo.png' %}" alt="">
+        </div>
+    
+        <div class="info-txt">
+            <h2>Sobre <span>Nosotros</span></h2>
+            <p>
+                Nos especializamos en una amplia gama de servicios, desde cortes de cabello 
+                de última tendencia hasta tratamientos capilares avanzados, coloraciones personalizadas
+                y maquillaje profesional. Desde el momento en que entras, serás recibido con un ambiente cálido y acogedor.
+            </p>
+    
+            <div class="buttons">
+                <a href="#" class="btn-1">Información</a>
+                <a href="#" class="btn-1">Agendar ahora</a>
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+        <div class="footer-content container" id="contactos.html">
+            <div class="linkh4">
+                <h4>Celia's Hair Studio</h4>
+                <ul>
+                    <li><a href="#">Teléfono: 0982-137515</a></li> 
+                    <li><a href="#">usuario@gmail.com</a></li> 
+                </ul>
+    
+                <h4>Dirección</h4>
+                <ul>
+                    <li><a href="#">Miguel Ángel Rodríguez c/ Edgardo Viccini</a></li> 
+                    <li><a href="#">Villa Elisa Py.</a></li> 
+                </ul>
+    
+                <h4>Redes Sociales</h4>
+                <ul>
+                    <li><a href="#"><i class="fa-brands fa-instagram"></i> <i class="fa-brands fa-whatsapp"></i></a></li> 
+                </ul>
+            </div>
+    
+            <div class="link">
+                <h4>Google Maps</h4>
+                <ul>
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3604.7931826755143!2d-57.59779892540995!3d-25.37824703084445!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945dabaa91b402a3%3A0xa93810986efadf07!2sCelia&#39;s%20Hair%20Studio%20Unisex!5e0!3m2!1ses!2spy!4v1725210747667!5m2!1ses!2spy"
+                        width="550" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </ul>
+            </div>
+        </div>
+    </footer>
+        
+    <!-- Resto del código HTML sigue igual -->
+</body>
+</html>

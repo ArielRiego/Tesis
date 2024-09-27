@@ -1,0 +1,598 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+    list-style: none;
+}
+
+html,body {
+    scroll-behavior: smooth;
+}
+
+section [id] {
+    scroll-margin-top: 70px;
+} 
+
+body {
+    font-family: "Poppins", sans-serif;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+} 
+
+.containerDos {
+    max-width: 2000px;
+    margin: 0 auto;
+}
+
+.header {
+
+    display: flex;
+    flex-direction: column; /* Alinea el contenido verticalmente */
+    align-items: center; /* Centra horizontalmente */
+    justify-content: center; /* Centra verticalmente */
+    min-height: 100vh;
+    padding-top: 50px;
+    width: 100%;
+    background: #fbd5e5;
+    position: relative;
+    box-sizing: border-box;
+
+}
+
+
+
+.svg {
+    width: 100%;
+    height: auto;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 0; /* Asegura que el SVG esté detrás del contenido */
+}
+.svg svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+
+
+.menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #ffffff;
+    padding: 0 50px; /*Espacio interno a los lados*/
+    box-sizing: border-box;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1; /* Asegura que el menú esté encima del SVG */
+}
+
+
+.Logo {
+    color: rgb(0, 0, 0);
+    font-size:  25px;
+    font-weight: 800;
+    text-transform: uppercase;   
+}
+
+.Logo img {
+    width: 45%;
+}
+
+.menu .navbar {
+    display: flex;
+    justify-content: center; /* Centra horizontalmente los elementos del menú */
+}
+
+
+.menu .navbar ul {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.menu .navbar ul li {
+    margin: 0 15px; /* Ajusta el margen entre los elementos del menú */
+}
+
+.menu .navbar ul li a {
+    font-size: 18px;
+    padding: 10px 15px;
+    color: rgb(0, 0, 0);
+    display: block;
+    font-weight: 600;
+}
+
+.menu .navbar ul li a:hover {
+    color: rgb(228, 16, 80);
+}
+
+#menu {
+    display: none;
+}
+
+.menu-icono {
+    width: 25px;
+}
+
+
+.menu label {
+    cursor: pointer;
+    display: none;
+}
+
+.header-content {
+    display: flex;
+    flex-direction: row; /* Alinea el contenido horizontalmente */
+    align-items: center; /* Centra verticalmente los elementos */
+    justify-content: center; /* Centra horizontalmente los elementos */
+    text-align: center; /* Centra el texto dentro del contenido */
+    position: relative;
+    z-index: 1; /* Asegura que el contenido esté encima del SVG */
+}
+
+.header-txt {
+    width: 50%;
+}
+
+/*color del primer titulo*/
+.header-txt h1 { 
+    font-size: 40px; /*Tamaño de fuente*/
+    line-height: 50px; /*Espacio entre las palabras*/
+    color: rgb(255, 255, 255);
+    margin-bottom: 20px;
+}
+
+.header-txt span {
+    font-size: 40px; /*Tamaño de fuente*/
+    color: rgb(255, 255, 255);
+}
+
+.header-txt p {
+    font-size: 16px;
+    color: rgb(0, 0, 0);
+    margin-bottom: 30px;
+}
+
+.header-img {
+    width: 50%;
+    text-align: center;
+}
+
+/*tamano de la primera imagen */
+.header-img img {
+    width: 500px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+/*botones de arriba */
+.btn-1 {
+    display: inline-block;
+    padding: 13px 20px;
+    border: 1px solid rgb(228, 16, 80);
+    color: rgb(228, 16, 80);
+    border-radius: 15px;
+    margin-right: 30px;
+    font-size: 16px;
+    text-transform: capitalize; /*Para que las primeras letras salgas en mayus*/
+}
+
+.btn-1:hover {
+    background-color: rgba(228, 16, 80, 0.281);
+    color: rgb(228, 16, 80);
+    box-shadow: 0 0 15px rgba(228, 16, 80, 0.452),
+                0 0 15px rgba(228, 16, 80, 0.452);
+}
+
+.menu-pl {
+    padding: 0 0 100px 0;
+}
+
+
+/*Color del titulo de Nuestro Top Servicios*/
+h2 {
+  font-size: 50px;
+  color: black;
+  margin-bottom: 40px;  
+}
+
+/*Titulo Servicios*/
+span {
+    color: rgb(228, 16, 80);
+}
+
+.general-content {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 35px;  
+}
+
+.general-txt {
+    border-radius:  25px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    padding-bottom: 35px;
+}
+
+.general-txt img{
+    border-radius: 25px 25px 0 0;
+    width: 100%;
+    height: 250px;
+}
+
+/*Letras de los cuadros de Top Servicios*/
+.general-txt h3 {
+    font-size:  18px;
+    color: rgb(228, 16, 80);
+    padding: 25px 25px 10px 25px;
+}
+
+.general-txt p {
+    font-size:  16px;
+    color: rgb(0, 0, 0);
+    padding: 0 25px 20px 25px;
+}
+
+.Precios {
+    padding: 0 25px 10px 25px;
+    display: flex;
+    justify-content: space-between;
+}
+
+/*Precios de los Top Servicios*/ 
+.Precios span {
+    color:  rgb(228, 16, 80);
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.btn-2 {
+    display: inline-block;
+    background-color: rgb(228, 16, 80);
+    font-size: 14px;
+    padding: 7px 15px;
+    color: rgb(255, 255, 255);
+    border-radius: 10px;
+}
+
+.btn-2:hover {
+    box-shadow: 0 0 15px rgba(228, 16, 80, 0.452),
+                0 0 15px rgba(228, 16, 80, 0.452);
+}
+
+
+/*Color del tercer contenedor de Servicios Especiales*/
+.about {
+    padding: 7px 0;
+    margin-bottom: 100px;
+    background-color: #fbd5e5;
+}
+
+.about-content {
+    display: flex;
+}
+
+.about-txt {
+    width: 50%;
+}
+
+/*Titulo de Servicios Especiales*/
+.about-txt h2 {
+    color: rgb(255, 255, 255);
+}
+
+/*Texto de Servicios especiales*/
+.about-txt p {
+    font-size: 16px;
+    color: rgb(0, 0, 0);
+    margin-bottom: 30px;
+}
+
+.Hamburguer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.Hamburguer span {
+    font-size: 80px;
+    font-weight: 800;
+}
+
+/*para centrar la imagen de servicios especiales */
+.about-img {
+    width: 50%;
+    text-align: right;
+}
+
+.info {
+    padding-bottom:  100px;
+    display: flex;
+    position: relative;
+}
+
+.info-img {
+    width: 50%;
+}
+
+.info-img img {
+    border-radius:  25px;
+    width: 600px;
+}
+
+.info-txt {
+    width: 50%;
+    padding-left: 55px;
+}
+
+.info-txt p {
+    font-size: 16px;
+    color: cadetblue;
+    margin-bottom: 35px;
+}
+
+
+.footer {
+    padding: 50px 0;
+    background-color:  #fbd5e5;
+}
+
+.footer-content {
+    display: flex;
+    justify-content:space-around;
+}
+
+/*Bottones de ig y wp*/
+
+
+ini {
+    text-align: center;
+    font-size: 35px;
+    color: black;
+    margin: 10px;
+    transition: .3s ease; /*Tiempo de reaccion del link*/
+}
+
+i {
+    text-align: center;
+    font-size: 25px;
+    color: black;
+    background-color: #fbd5e5;
+    margin: 10px;
+    border-radius: 50%;
+    padding: 15px;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.301);
+    transition: .3s ease; /*Tiempo de reaccion del link*/
+}
+
+i {
+    text-align: center;
+    font-size: 25px;
+    color: black;
+    background-color: #fbd5e5;
+    margin: 10px;
+    border-radius: 50%;
+    padding: 15px;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.301);
+    transition: .3s ease; /*Tiempo de reaccion del link*/
+}
+
+.fa-instagram:hover {
+    background-color: #ffffff;
+    color: rgb(228, 16, 80);
+    box-shadow: 0 0 15px rgba(228, 16, 80, 0.452),
+                0 0 15px rgba(228, 16, 80, 0.452);
+}
+
+.fa-whatsapp:hover {
+    background-color: #ffffff;
+    color: rgb(228, 16, 80);
+    box-shadow: 0 0 15px rgba(228, 16, 80, 0.452),
+                0 0 15px rgba(228, 16, 80, 0.452);
+}
+
+/*Letras de la parte contacto*/
+h4 {
+    font-size:  15px;
+    color: rgb(228, 16, 80);
+    padding: 25px 25px 10px 25px;
+    text-align: center;
+}
+
+.linkh4 a {
+    color: rgb(0, 0, 0);
+    font-size: 15px;
+    display: block;
+    margin-bottom: 10px;
+    text-align: center;
+}
+.linkh4 a:hover {
+    color: rgb(228, 16, 80);
+}
+
+/*------------------------------*/
+
+.link h3 {
+    color: rgb(0, 0, 0);
+    font-size: 18px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.link a {
+    color: rgb(0, 0, 0);
+    font-size: 16px;
+    display: block;
+    margin-bottom: 10px;
+    text-align: center;
+    
+}
+
+.link a:hover {
+    color: rgb(228, 16, 80);
+}
+
+/*Parte resposiva*/
+
+@media(max-width:991px) {
+    .menu {
+        padding: 10px;
+        flex-direction: column;
+        align-items: flex-start; /* Ajusta el alineamiento del menú */
+    }
+
+    .menu label {
+        display: initial;
+    }
+
+    /*Para el menu hamburguesa*/
+    .menu .navbar {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: rgb(27, 25, 25);
+        display: none;
+    }
+
+
+    .menu .navbar ul {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .menu .navbar ul li {
+        margin: 5px 0;
+    }
+
+    #menu:checked ~ .navbar {
+        display: initial;
+    }
+
+    .header {
+        min-height: 0vh;
+    }
+
+    .header-content {
+        flex-direction: column;
+        padding: 30px 30px 50px 30px;
+        text-align: center;
+    }
+
+    .header-txt, .header-img {
+        width: 100%;
+    }
+
+    .header-txt span {
+        font-size: 70px;
+    }
+
+    .header-img {
+        width: 100%;
+    }
+    
+    .header-img img {
+        width: 300px;
+    }
+
+    .buttons {
+        justify-content: center;
+    }
+
+    .btn-1 {
+        margin: 0 10px;
+    }
+
+    .menu-pl {
+        padding: 0 30px 30px 30px;
+    }
+
+    .general-content {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+    }
+
+    .about {
+        padding: 30px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .about-content {
+        flex-direction: column;
+    }
+
+    .about-txt {
+        width: 100%;
+    }
+
+    .about-txt p {
+        margin-bottom: 0;
+    }
+
+    .about-img {
+        width: 100%;
+        text-align: center;
+    }
+
+    .about-img img {
+        width: 100%;
+    }
+
+    .info {
+        padding: 30px;
+        flex-direction: column;
+    }
+
+    .info-img {
+        width: 100%;
+    }
+
+    .info-img img {
+        width: 100%;
+    }
+
+    .info-txt {
+        width: 100%;
+        padding-left: 0;
+        text-align: center;
+    }
+
+    .footer {
+        padding: 30px;
+        text-align:  center;
+    }
+
+    .footer-content {
+        flex-direction: column;
+    }
+
+}
+
+@media(min-width:1200px) {
+    .containerDos {
+        max-width: 3000px;
+        margin: 0 auto;
+    } 
+}

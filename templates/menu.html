@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-uac-compatible" content="IE-edge">  <!-- Se usa para renderizar el sitio web -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Cargar los íconos desde CDN -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+    <!-- Vincular el archivo de estilos CSS -->
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <!-- Agregar estilos de Toastr para los mensajes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <title>Salon de belleza</title>
+</head>
+<body>
+     
+    <!-- Inicio Menu vertical-->
+    <section id="sidebar">
+        <a href="#" class="brand"><img src="{% static 'HairStudiodos.png' %}" alt="Salon Logo"></a>
+        <ul class="side-menu">
+            <li><a href="{% url 'menu' %}" class="activo"><i class='bx bxs-dashboard icon'></i>Menu</a></li>
+            <li class="divider">Principal</li>
+            <li><a href="#"><i class='bx bxs-calendar icon'></i>Calendario</a></li>
+            <li><a href="{% url 'listar_servicios' %}"><i class='bx bxs-widget icon'></i>Servicios</a></li>
+            <li><a href="{% url 'listar_clientes' %}"><i class='bx bxs-user-pin icon'></i>Cliente</a></li>
+            <li><a href="#"><i class='bx bxs-book-content icon'></i>Reporte<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#">Operativo</a></li>
+                    <li><a href="#">Gerencial</a></li>
+                </ul>
+            </li>
+            <li class="divider">Seccion Administrador</li>
+            <li><a href="#"><i class='bx bxs-notepad icon'></i>Ajustes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#">Servicio</a></li>
+                    <li><a href="#">Empleado</a></li>
+                    <li><a href="#">Roles</a></li>
+                </ul>
+            </li>
+        </ul>
+
+        <div class="ads">
+            <div class="wrapper">
+                <a href="{% url 'logout' %}" class="btn-upgrade">Cerrar Sesion</a>
+            </div>
+        </div>
+    </section>
+    <!-- Fin Menu vertical -->
+
+   <!-- Inicio Menu Horizontal -->
+   <section id="content"> 
+    <nav>
+        <i class='bx bx-menu toggle-sidebar'></i>
+        <a href="#" class="nav-link">
+            <i class='bx bxs-bell icon'></i>
+            <span class="badge"></span>
+        </a>
+        
+        <div class="profile">
+            <ul class="profile-link">
+                <li><a href="#"><i class='bx bxs-user-circle icon'></i></a></li>
+            </ul>
+        </div>
+    </nav>
+   </section>
+   <!-- Fin Menu Horizontal -->
+    <!-- Scripts para los mensajes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "preventDuplicates": true,
+                "newestOnTop": false,
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+            
+            {% if messages %}
+                {% for message in messages %}
+                    toastr.{{ message.tags }}('{{ message|escapejs }}');
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
+    <!-- Cargar el archivo de scripts JS -->
+    <script src="{% static 'script.js' %}"></script>
+    
+</body>
+</html>
