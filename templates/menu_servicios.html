@@ -1,0 +1,181 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-uac-compatible" content="IE-edge">  <!-- Se usa para renderizar el sitio web -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Cargar los íconos desde CDN -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <!-- Vincular el archivo de estilos CSS -->
+    <link rel="stylesheet" href="{% static 'style_servicios.css' %}">
+    <!-- Agregar estilos de Toastr para los mensajes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <title>Salon de belleza</title>
+</head>
+<body>
+    <!-- Inicio Menu vertical-->
+    <section id="sidebar">
+        <a href="#" class="brand"><img src="{% static 'HairStudiodos.png' %}" alt="Salon Logo"></a>
+        <ul class="side-menu">
+            <li><a href="{% url 'menu' %}" class="activo"><i class='bx bxs-dashboard icon'></i>Menu</a></li>
+            <li class="divider">Principal</li>
+            <li><a href="#"><i class='bx bxs-calendar icon'></i>Calendario</a></li>
+            <li><a href="{% url 'listar_servicios' %}"><i class='bx bxs-widget icon'></i>Servicios</a></li>
+            <li><a href="{% url 'listar_clientes' %}"><i class='bx bxs-user-pin icon'></i>Cliente</a></li>
+            <li><a href="#"><i class='bx bxs-book-content icon'></i>Reporte<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#">Operativo</a></li>
+                    <li><a href="#">Gerencial</a></li>
+                </ul>
+            </li>
+            <li class="divider">Seccion Administrador</li>
+            <li><a href="#"><i class='bx bxs-notepad icon'></i>Ajustes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#">Servicio</a></li>
+                    <li><a href="#">Empleado</a></li>
+                    <li><a href="#">Roles</a></li>
+                </ul>
+            </li>
+        </ul>
+
+        <div class="ads">
+            <div class="wrapper">
+                <a href="{% url 'logout' %}" class="btn-upgrade">Cerrar Sesion</a>
+            </div>
+        </div>
+    </section>
+    <!-- Fin Menu vertical -->
+
+   <!-- Inicio Menu Horizontal -->
+   <section id="content"> 
+        <nav>
+            <i class='bx bx-menu toggle-sidebar'></i>
+            <a href="#" class="nav-link">
+                <i class='bx bxs-bell icon'></i>
+                <span class="badge"></span>
+            </a>
+            
+            <div class="profile">
+                <ul class="profile-link">
+                    <li><a href="#"><i class='bx bxs-user-circle icon'></i></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Agregar la tabla aquí -->
+        <div class="main-content">
+            <div class="table-container">
+                <div class="table-header">
+                    <h2 class="table-title">Lista de Servicios</h2>
+                    <div class="search-and-add">
+                        <form action="{% url 'listar_servicios' %}" method="GET" class="search-form" id="search-form">
+                            <div class="form-group">
+                                <input type="text" name="q" placeholder="Buscar..." value="{{ query }}">
+                                <i class='bx bx-search icon'></i>
+                            </div>
+                        </form>
+                        <a href="{% url 'agregar_servicio' %}" class="btn-add-service">Agregar Servicio</a>
+                    </div>
+                </div>
+                <table id="servicios-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Descripción</th>
+                            <th>Duración</th>
+                            <th>Costo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for servicio in servicios %}
+                        <tr>
+                            <td>{{ servicio.idservicio }}</td>
+                            <td>{{ servicio.descripcion }}</td>
+                            <td>{{ servicio.duracion }}</td>
+                            <td>{{ servicio.costo }}</td>
+                            <td>
+                                <a href="{% url 'editar_servicio' idservicio=servicio.idservicio %}">✎</a>
+                                <a href="{% url 'eliminar_servicio' idservicio=servicio.idservicio %}">🗑️</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">No hay servicios disponibles.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    
+        <script>
+        $(document).ready(function() {
+            // Función para realizar la búsqueda en tiempo real
+            function performSearch() {
+                var query = $('input[name="q"]').val().toLowerCase();
+                $('#servicios-table tbody tr').each(function() {
+                    var row = $(this);
+                    var text = row.text().toLowerCase();
+                    if(text.indexOf(query) === -1) {
+                        row.hide();
+                    } else {
+                        row.show();
+                    }
+                });
+            }
+    
+            // Evento de entrada en el campo de búsqueda
+            $('input[name="q"]').on('input', function() {
+                performSearch();
+            });
+    
+            // Envío del formulario para búsqueda del lado del servidor
+            $('#search-form').on('submit', function(e) {
+                e.preventDefault();
+                var query = $('input[name="q"]').val();
+                window.location.href = "{% url 'listar_servicios' %}?q=" + encodeURIComponent(query);
+            });
+    
+            // Realizar búsqueda inicial si hay una consulta
+            if($('input[name="q"]').val()) {
+                performSearch();
+            }
+        });
+        </script>
+   <!-- Fin Menu Horizontal -->
+   <!-- Scripts para los mensajes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "preventDuplicates": true,
+                "newestOnTop": false,
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+            
+            {% if messages %}
+                {% for message in messages %}
+                    toastr.{{ message.tags }}('{{ message|escapejs }}');
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
+    <!-- Cargar el archivo de scripts JS -->
+    <script src="{% static 'script.js' %}"></script>
+</body>
+</html>

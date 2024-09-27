@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-uac-compatible" content="IE-edge">  <!-- Se usa para renderizar el sitio web -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Cargar los íconos desde CDN -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+    <!-- Vincular el archivo de estilos CSS -->
+    <link rel="stylesheet" href="{% static 'editar_cliente.css' %}">
+    <!-- Agregar estilos de Toastr para los mensajes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <title>Salon de belleza - Editar Cliente</title>
+</head>
+<body>
+    <!-- Inicio Menu vertical-->
+    <section id="sidebar">
+        <a href="#" class="brand"><img src="{% static 'HairStudiodos.png' %}" alt="Salon Logo"></a>
+        <ul class="side-menu">
+            <li><a href="{% url 'menu' %}" class="activo"><i class='bx bxs-dashboard icon'></i>Menu</a></li>
+            <li class="divider">Principal</li>
+            <li><a href="#"><i class='bx bxs-calendar icon'></i>Calendario</a></li>
+            <li><a href="{% url 'listar_servicios' %}"><i class='bx bxs-widget icon'></i>Servicios</a></li>
+            <li><a href="{% url 'listar_clientes' %}"><i class='bx bxs-user-pin icon'></i>Cliente</a></li>
+            <li><a href="#"><i class='bx bxs-book-content icon'></i>Reporte<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#">Operativo</a></li>
+                    <li><a href="#">Gerencial</a></li>
+                </ul>
+            </li>
+            <li class="divider">Seccion Administrador</li>
+            <li><a href="#"><i class='bx bxs-notepad icon'></i>Ajustes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#">Servicio</a></li>
+                    <li><a href="#">Empleado</a></li>
+                    <li><a href="#">Roles</a></li>
+                </ul>
+            </li>
+        </ul>
+
+        <div class="ads">
+            <div class="wrapper">
+                <a href="{% url 'logout' %}" class="btn-upgrade">Cerrar Sesion</a>
+            </div>
+        </div>
+    </section>
+    <!-- Fin Menu vertical -->
+
+   <!-- Inicio Menu Horizontal -->
+   <section id="content"> 
+        <nav>
+            <i class='bx bx-menu toggle-sidebar'></i>
+            <a href="#" class="nav-link">
+                <i class='bx bxs-bell icon'></i>
+                <span class="badge"></span>
+            </a>
+            
+            <div class="profile">
+                <ul class="profile-link">
+                    <li><a href="#"><i class='bx bxs-user-circle icon'></i></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="main-content">
+            <div class="edit-form-container">
+                <h2 class="page-title">Editar Cliente</h2>
+                <form method="post" class="edit-client-form">
+                    {% csrf_token %}
+                    <div class="edit-form-group">
+                        <label for="cedula">Cédula:</label>
+                        <input type="text" id="cedula" name="cedula" required value="{{ cliente.cedula }}" readonly>
+                    </div>
+                    <div class="edit-form-group">
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" id="nombre" name="nombre" required value="{{ cliente.nombre }}">
+                    </div>
+                    <div class="edit-form-group">
+                        <label for="apellido">Apellido:</label>
+                        <input type="text" id="apellido" name="apellido" required value="{{ cliente.apellido }}">
+                    </div>
+                    <div class="edit-form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required value="{{ cliente.email }}">
+                    </div>
+                    <div class="edit-form-group">
+                        <label for="ruc">RUC:</label>
+                        <input type="text" id="ruc" name="ruc" required value="{{ cliente.ruc }}">
+                    </div>
+                    <div class="edit-form-group">
+                        <label for="telefono">Teléfono:</label>
+                        <input type="tel" id="telefono" name="telefono" required value="{{ cliente.telefono }}">
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-submit">Actualizar Cliente</button>
+                        <a href="{% url 'listar_clientes' %}" class="btn btn-cancel">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+   </section>
+   <!-- Scripts para los mensajes -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+   <script>
+       $(document).ready(function() {
+           {% if messages %}
+               {% for message in messages %}
+                   toastr.options = {
+                       "closeButton": true,
+                       "progressBar": true,
+                       "positionClass": "toast-top-right",
+                       "timeOut": "5000",
+                   };
+                   toastr.{{ message.tags }}('{{ message|escapejs }}');
+               {% endfor %}
+           {% endif %}
+       });
+   </script>
+
+   <!-- Cargar el archivo de scripts JS -->
+   <script src="{% static 'script.js' %}"></script>
+</body>
+</html>

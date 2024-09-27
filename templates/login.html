@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-uac-compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salon de belleza</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'estilo.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        /* Opcional: Estilos para la caja de mensajes */
+        .messages {
+            display: none; /* Oculta el contenedor de mensajes por defecto */
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper"> 
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <h1>Login</h1>
+
+            <div class="input-box">
+                <input type="text" name="username" placeholder="Nombre de usuario" required>
+                <i class='bx bxs-user'></i>
+            </div>
+
+            <div class="input-box">
+                <input type="password" name="password" placeholder="Contraseña" required>
+                <i class='bx bxs-lock-alt'></i>
+            </div>
+
+           <!-- /* <div class="remember-forgot">
+                <label><input type="checkbox"> Recuerdame</label>
+                <a href="#">Olvido la contraseña?</a>
+            </div>*/-->
+
+            <button type="submit" class="btn">Login</button>
+
+            <div class="register-link">
+                <p>Regresar a <a href="{% url 'inicio' %}">Inicio</a></p>
+            </div>
+        </form>
+    </div>
+
+    <!-- Scripts para los mensajes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            {% if messages %}
+                {% for message in messages %}
+                    toastr.{{ message.tags }}('{{ message|escapejs }}');
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
+</body>
+</html>
+
+
