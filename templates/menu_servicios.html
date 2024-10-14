@@ -33,14 +33,14 @@
                     <li><a href="#">Gerencial</a></li>
                 </ul>
             </li>
+            {% if user.usuario_administrador %}
             <li class="divider">Seccion Administrador</li>
             <li><a href="#"><i class='bx bxs-notepad icon'></i>Ajustes<i class='bx bxs-chevron-right icon-right'></i></a>
                 <ul class="side-dropdown">
-                    <li><a href="#">Servicio</a></li>
-                    <li><a href="#">Empleado</a></li>
-                    <li><a href="#">Roles</a></li>
+                    <li><a href="{% url 'listar_empleados' %}">Empleado</a></li>
                 </ul>
             </li>
+            {% endif %}
         </ul>
 
         <div class="ads">
@@ -53,66 +53,74 @@
 
    <!-- Inicio Menu Horizontal -->
    <section id="content"> 
-        <nav>
-            <i class='bx bx-menu toggle-sidebar'></i>
-            <a href="#" class="nav-link">
-                <i class='bx bxs-bell icon'></i>
-                <span class="badge"></span>
-            </a>
-            
-            <div class="profile">
-                <ul class="profile-link">
-                    <li><a href="#"><i class='bx bxs-user-circle icon'></i></a></li>
-                </ul>
-            </div>
-        </nav>
-
-        <!-- Agregar la tabla aquí -->
-        <div class="main-content">
-            <div class="table-container">
-                <div class="table-header">
-                    <h2 class="table-title">Lista de Servicios</h2>
-                    <div class="search-and-add">
-                        <form action="{% url 'listar_servicios' %}" method="GET" class="search-form" id="search-form">
-                            <div class="form-group">
-                                <input type="text" name="q" placeholder="Buscar..." value="{{ query }}">
-                                <i class='bx bx-search icon'></i>
-                            </div>
-                        </form>
-                        <a href="{% url 'agregar_servicio' %}" class="btn-add-service">Agregar Servicio</a>
-                    </div>
-                </div>
-                <table id="servicios-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Descripción</th>
-                            <th>Duración</th>
-                            <th>Costo</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for servicio in servicios %}
-                        <tr>
-                            <td>{{ servicio.idservicio }}</td>
-                            <td>{{ servicio.descripcion }}</td>
-                            <td>{{ servicio.duracion }}</td>
-                            <td>{{ servicio.costo }}</td>
-                            <td>
-                                <a href="{% url 'editar_servicio' idservicio=servicio.idservicio %}">✎</a>
-                                <a href="{% url 'eliminar_servicio' idservicio=servicio.idservicio %}">🗑️</a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5">No hay servicios disponibles.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+    <nav>
+        <i class='bx bx-menu toggle-sidebar'></i>
+        <a href="#" class="nav-link">
+            <i class='bx bxs-bell icon'></i>
+            <span class="badge"></span>
+        </a>
+        
+        <div class="profile">
+            <ul class="profile-link">
+                <li><a href="#"><i class='bx bxs-user-circle icon'></i></a></li>
+            </ul>
         </div>
+    </nav>
+
+    <!-- Agregar la tabla aquí -->
+    <div class="main-content">
+        <div class="table-container">
+            <div class="table-header">
+                <h2 class="table-title">Lista de Servicios</h2>
+                <div class="search-and-add">
+                    <form action="{% url 'listar_servicios' %}" method="GET" class="search-form" id="search-form">
+                        <div class="form-group">
+                            <input type="text" name="q" placeholder="Buscar..." value="{{ query }}">
+                            <i class='bx bx-search icon'></i>
+                        </div>
+                    </form>
+                    {% if puede_editar %}
+                    <a href="{% url 'agregar_servicio' %}" class="btn-add-service">Agregar Servicio</a>
+                    {% endif %}
+                </div>
+            </div>
+            <table id="servicios-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Descripción</th>
+                        <th>Duración</th>
+                        <th>Costo</th>
+                        <th>Tipos de Usuario</th>
+                        {% if puede_editar %}
+                        <th>Acciones</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for servicio in servicios %}
+                    <tr>
+                        <td>{{ servicio.servicio.idservicio }}</td>
+                        <td>{{ servicio.servicio.descripcion }}</td>
+                        <td>{{ servicio.servicio.duracion }}</td>
+                        <td>{{ servicio.servicio.costo }}</td>
+                        <td>{{ servicio.tipos_usuario|join:", " }}</td>
+                        {% if puede_editar %}
+                        <td>
+                            <a href="{% url 'editar_servicio' idservicio=servicio.servicio.idservicio %}">✎</a>
+                            <a href="{% url 'eliminar_servicio' idservicio=servicio.servicio.idservicio %}">🗑️</a>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="{% if puede_editar %}6{% else %}5{% endif %}">No hay servicios disponibles.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
     
         <script>
         $(document).ready(function() {

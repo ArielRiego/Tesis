@@ -1,22 +1,103 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="x-uac-compatible" content="IE-edge">  <!-- Se usa para renderizar el sitio web -->
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Cargar los íconos desde CDN -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-
-    <!-- Vincular el archivo de estilos CSS -->
     <link rel="stylesheet" href="{% static 'style.css' %}">
-    <!-- Agregar estilos de Toastr para los mensajes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    <title>Salon de belleza</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.css' rel='stylesheet' />
+    
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    
+    <title>Salon de belleza - Calendario de Citas</title>
+    <style>
+        #calendar {
+        max-width: 1700px;
+        margin: 0 auto;
+        }
+        /* Estilos para hacer el calendario más compacto */
+        .fc .fc-daygrid-day-frame {
+            min-height: 50px;
+            
+        }
+        .fc .fc-daygrid-day-top {
+            flex-direction: row;
+            font-size: 0.9em;
+        }
+        .fc .fc-daygrid-day-number {
+            padding: 2px;
+        }
+        .fc .fc-daygrid-event {
+            font-size: 0.8em;
+            padding: 1px 2px;
+        }
+        .fc .fc-toolbar-title {
+            font-size: 1.2em;
+        }
+        .fc .fc-button {
+            font-size: 0.9em;
+            padding: 0.3em 0.6em;
+        }
+
+        /* Estilos para el toastr de detalles de cita */
+        .toastr-info-large {
+            width: 350px !important;
+            max-width: 100%;
+        }
+        .toastr-info-large .toast-message {
+            font-size: 14px;
+            .toastr-info-large {
+            width: 350px !important;
+            max-width: 100%;
+            }
+            .toastr-info-large .toast-message {
+                font-size: 14px;
+            }
+        } 
+        .sliding-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background-color: #fff;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            transition: right 0.3s ease-in-out;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .sliding-panel.open {
+            right: 0;
+        }
+        .close-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        #serviceList {
+            margin-top: 20px;
+        }
+        .service-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-     
     <!-- Inicio Menu vertical-->
     <section id="sidebar">
         <a href="#" class="brand"><img src="{% static 'HairStudiodos.png' %}" alt="Salon Logo"></a>
@@ -26,14 +107,16 @@
             <li><a href="#"><i class='bx bxs-calendar icon'></i>Calendario</a></li>
             <li><a href="{% url 'listar_servicios' %}"><i class='bx bxs-widget icon'></i>Servicios</a></li>
             <li><a href="{% url 'listar_clientes' %}"><i class='bx bxs-user-pin icon'></i>Cliente</a></li>
-            <li><a href="#"><i class='bx bxs-book-content icon'></i>Reporte<i class='bx bxs-chevron-right icon-right'></i></a>
+            <li>
+                <a href="#"><i class='bx bxs-book-content icon'></i>Reporte<i class='bx bxs-chevron-right icon-right'></i></a>
                 <ul class="side-dropdown">
                     <li><a href="#">Operativo</a></li>
                     <li><a href="#">Gerencial</a></li>
                 </ul>
             </li>
             <li class="divider">Seccion Administrador</li>
-            <li><a href="#"><i class='bx bxs-notepad icon'></i>Ajustes<i class='bx bxs-chevron-right icon-right'></i></a>
+            <li>
+                <a href="#"><i class='bx bxs-notepad icon'></i>Ajustes<i class='bx bxs-chevron-right icon-right'></i></a>
                 <ul class="side-dropdown">
                     <li><a href="#">Servicio</a></li>
                     <li><a href="#">Empleado</a></li>
@@ -50,51 +133,500 @@
     </section>
     <!-- Fin Menu vertical -->
 
-   <!-- Inicio Menu Horizontal -->
-   <section id="content"> 
-    <nav>
-        <i class='bx bx-menu toggle-sidebar'></i>
-        <a href="#" class="nav-link">
-            <i class='bx bxs-bell icon'></i>
-            <span class="badge"></span>
-        </a>
-        
-        <div class="profile">
-            <ul class="profile-link">
-                <li><a href="#"><i class='bx bxs-user-circle icon'></i></a></li>
-            </ul>
+    <!-- Inicio Menu Horizontal y Contenido -->
+    <section id="content"> 
+        <nav>
+            <i class='bx bx-menu toggle-sidebar'></i>
+            <a href="#" class="nav-link">
+                <i class='bx bxs-bell icon'></i>
+                <span class="badge"></span>
+            </a>
+            
+            <div class="profile">
+                <ul class="profile-link">
+                    <li><a href="#"><i class='bx bxs-user-circle icon'></i></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Contenido del Calendario -->
+        <main class="calendar-content">
+            <h1 class="text-center mb-4">Calendario de Citas</h1>
+            
+            <div id="calendar"></div>
+        </main>
+    </section>
+    <!-- Fin Menu Horizontal y Contenido -->
+
+    <!-- Panel deslizante para agendar citas -->
+    <div id="bookingPanel" class="sliding-panel">
+        <span class="close-panel">&times;</span>
+        <div class="p-3">
+            <h2 class="mb-3">Agendar Nueva Cita</h2>
+            <form id="bookingForm">
+                <div class="mb-3">
+                    <label for="client" class="form-label">Cliente</label>
+                    <select class="form-select" id="client" required>
+                        <option value="">Seleccione un cliente</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="bookingDate" class="form-label">Fecha</label>
+                    <input type="date" class="form-control" id="bookingDate" required>
+                </div>
+                <div class="mb-3">
+                    <label for="bookingTime" class="form-label">Hora</label>
+                    <input type="time" class="form-control" id="bookingTime" required>
+                </div>
+                <div class="mb-3">
+                    <label for="bookingStatus" class="form-label">Estado</label>
+                    <select class="form-select" id="bookingStatus" required>
+                        <option value="programada">Programada</option>
+                        <option value="cancelada">Cancelada</option>
+                        <option value="completada">Completada</option>
+                        <option value="pendiente">Pendiente</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="graceTime" class="form-label">Tiempo de gracia (minutos)</label>
+                    <input type="number" class="form-control" id="graceTime" value="10" min="0" required>
+                </div>
+                <h3>Servicios</h3>
+                <div id="serviceList"></div>
+                <button type="button" id="addServiceBtn" class="btn btn-secondary mb-3">Añadir Servicio</button>
+                <div class="mb-3">
+                    <label for="totalDuration" class="form-label">Duración total</label>
+                    <input type="text" class="form-control" id="totalDuration" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="totalPrice" class="form-label">Precio total</label>
+                    <input type="text" class="form-control" id="totalPrice" readonly>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Guardar Cita</button>
+            </form>
         </div>
-    </nav>
-   </section>
-   <!-- Fin Menu Horizontal -->
-    <!-- Scripts para los mensajes -->
+    </div>
+
+    <!-- Panel deslizante para añadir servicios -->
+    <div id="servicePanel" class="sliding-panel">
+        <span class="close-panel">&times;</span>
+        <div class="p-3">
+            <h2 class="mb-3">Añadir Servicio</h2>
+            <form id="serviceForm">
+                <div class="mb-3">
+                    <label for="service" class="form-label">Servicio</label>
+                    <select class="form-select" id="service" required>
+                        <option value="">Seleccione un servicio</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="employee" class="form-label">Empleado</label>
+                    <select class="form-select" id="employee" required>
+                        <option value="">Seleccione un empleado</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="serviceDuration" class="form-label">Duración (minutos)</label>
+                    <input type="number" class="form-control" id="serviceDuration" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="servicePrice" class="form-label">Precio (Gs.)</label>
+                    <input type="number" class="form-control" id="servicePrice" readonly>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Añadir Servicio</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            toastr.options = {
-                "closeButton": true,
-                "progressBar": true,
-                "positionClass": "toast-top-right",
-                "timeOut": "5000",
-                "extendedTimeOut": "1000",
-                "preventDuplicates": true,
-                "newestOnTop": false,
-                "showEasing": "swing",
-                "hideEasing": "linear",
-                "showMethod": "fadeIn",
-                "hideMethod": "fadeOut"
-            };
-            
-            {% if messages %}
-                {% for message in messages %}
-                    toastr.{{ message.tags }}('{{ message|escapejs }}');
-                {% endfor %}
-            {% endif %}
-        });
-    </script>
-    <!-- Cargar el archivo de scripts JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/locales-all.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{% static 'script.js' %}"></script>
     
+    <script>
+$(document).ready(function() {
+    // Función para cargar los clientes
+    function cargarClientes() {
+        $.ajax({
+            url: '{% url "obtener_clientes" %}',
+            method: 'GET',
+            success: function(data) {
+                var select = $('#client');
+                select.empty().append('<option value="">Seleccione un cliente</option>');
+                $.each(data.clientes, function(index, cliente) {
+                    select.append($('<option></option>')
+                        .attr('value', cliente.cedula)
+                        .text(cliente.nombre + ' ' + cliente.apellido));
+                });
+                console.log("Clientes cargados:", data.clientes.length);
+                select.trigger('change');
+            },
+            error: function(error) {
+                console.error("Error al cargar clientes:", error);
+                toastr.error('Error al cargar clientes. Por favor, intente de nuevo.');
+            }
+        });
+    }
+
+    // Función para cargar servicios
+    function cargarServicios() {
+        $.ajax({
+            url: '{% url "obtener_servicios" %}',
+            method: 'GET',
+            success: function(data) {
+                var select = $('#service');
+                select.empty().append('<option value="">Seleccione un servicio</option>');
+                $.each(data.servicios, function(index, servicio) {
+                    select.append($('<option></option>')
+                        .attr('value', servicio.idservicio)
+                        .text(servicio.descripcion)
+                        .data('duration', servicio.duracion)
+                        .data('price', servicio.costo));
+                });
+                console.log("Servicios cargados:", data.servicios.length);
+                select.trigger('change');
+            },
+            error: function(error) {
+                console.error("Error al cargar servicios:", error);
+                toastr.error('Error al cargar servicios. Por favor, intente de nuevo.');
+            }
+        });
+    }
+
+    // Actualizar campos de duración y precio cuando se selecciona un servicio
+    $('#service').on('change', function() {
+        var selectedOption = $(this).find('option:selected');
+        var duration = selectedOption.data('duration');
+        var price = selectedOption.data('price');
+        
+        $('#serviceDuration').val(duration);
+        $('#servicePrice').val(price);
+    });
+
+    // Función para cargar los empleados
+    function cargarEmpleados() {
+        $.ajax({
+            url: '{% url "obtener_empleados" %}',
+            method: 'GET',
+            success: function(data) {
+                var select = $('#employee');
+                select.empty().append('<option value="">Seleccione un empleado</option>');
+                $.each(data.empleados, function(index, empleado) {
+                    select.append($('<option></option>')
+                        .attr('value', empleado.idtipousuario)
+                        .text(empleado.nombre + ' ' + empleado.apellido));
+                });
+                console.log("Empleados cargados:", data.empleados.length);
+                select.trigger('change');
+            },
+            error: function(error) {
+                console.error("Error al cargar empleados:", error);
+                toastr.error('Error al cargar empleados. Por favor, intente de nuevo.');
+            }
+        });
+    }
+
+    // Inicializar Select2 para la búsqueda de clientes, servicios y empleados
+    $('#client, #service, #employee').select2({
+        placeholder: 'Buscar...',
+        allowClear: true,
+        language: {
+            noResults: function() {
+                return "No se encontraron resultados";
+            }
+        },
+        minimumInputLength: 0
+    });
+
+    // Cargar datos iniciales
+    cargarClientes();
+    cargarServicios();
+    cargarEmpleados();
+
+    // Manejar clic en botón "Añadir Servicio"
+    $('#addServiceBtn').on('click', function() {
+        cargarServicios();
+        cargarEmpleados();
+        $('#servicePanel').addClass('open');
+    });
+
+    // Cerrar panel de servicio
+    $('.close-panel').on('click', function() {
+        $(this).closest('.sliding-panel').removeClass('open');
+    });
+
+    // Función para calcular y actualizar la duración total y el precio total
+    function actualizarTotales() {
+        var duracionTotal = 0;
+        var precioTotal = 0;
+        $('.service-item').each(function() {
+            duracionTotal += parseInt($(this).data('duration'));
+            precioTotal += parseFloat($(this).data('price'));
+        });
+        $('#totalDuration').val(duracionTotal + ' minutos');
+        $('#totalPrice').val(precioTotal.toFixed(0) + ' Gs.');
+    }
+// Función para obtener el ID del servicio por su nombre
+function obtenerIdServicio(nombreServicio) {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: '{% url "obtener_id_servicio" %}',
+                method: 'GET',
+                data: { nombre: nombreServicio },
+                success: function(data) {
+                    if (data.id) {
+                        resolve(data.id);
+                    } else {
+                        reject('No se encontró el ID del servicio');
+                    }
+                },
+                error: function(error) {
+                    reject('Error al obtener el ID del servicio');
+                }
+            });
+        });
+    }
+
+ // Nueva función para obtener el ID del empleado por su nombre
+ function obtenerIdEmpleado(nombreEmpleado) {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: '{% url "obtener_id_empleado" %}',
+                method: 'GET',
+                data: { nombre: nombreEmpleado },
+                success: function(data) {
+                    if (data.id) {
+                        resolve(data.id);
+                    } else {
+                        reject('No se encontró el ID del empleado');
+                    }
+                },
+                error: function(error) {
+                    reject('Error al obtener el ID del empleado');
+                }
+            });
+        });
+    }
+
+    // Manejar envío del formulario de servicio
+    $('#serviceForm').on('submit', function(e) {
+        e.preventDefault();
+        var servicioTexto = $('#service option:selected').text();
+        var empleadoTexto = $('#employee option:selected').text();
+        var duration = parseInt($('#serviceDuration').val());
+        var price = parseFloat($('#servicePrice').val());
+
+        if (servicioTexto && empleadoTexto) {
+            Promise.all([
+                obtenerIdServicio(servicioTexto),
+                obtenerIdEmpleado(empleadoTexto)
+            ])
+            .then(function([servicioId, empleadoId]) {
+                var serviceItem = $('<div class="service-item"></div>')
+                    .data('serviceId', servicioId)
+                    .data('employeeId', empleadoId)
+                    .data('duration', duration)
+                    .data('price', price);
+                serviceItem.append('<p><strong>Servicio:</strong> ' + servicioTexto + '</p>');
+                serviceItem.append('<p><strong>Empleado:</strong> ' + empleadoTexto + '</p>');
+                serviceItem.append('<p><strong>Duración:</strong> ' + duration + ' minutos</p>');
+                serviceItem.append('<p><strong>Precio:</strong> ' + price + ' Gs.</p>');
+                serviceItem.append('<button type="button" class="btn btn-danger btn-sm remove-service">Eliminar</button>');
+                
+                $('#serviceList').append(serviceItem);
+                $('#servicePanel').removeClass('open');
+                $('#serviceForm')[0].reset();
+                actualizarTotales();
+            })
+            .catch(function(error) {
+                toastr.error(error);
+            });
+        } else {
+            toastr.error('Por favor, seleccione un servicio y un empleado.');
+        }
+    });
+
+
+    // Eliminar servicio de la lista
+    $(document).on('click', '.remove-service', function() {
+        $(this).closest('.service-item').remove();
+        actualizarTotales();
+    });
+
+    // Manejar el envío del formulario principal
+    $('#bookingForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        var formData = {
+            idcliente: $('#client').val(),
+            fecha: $('#bookingDate').val(),
+            hora_inicio: $('#bookingTime').val(),
+            estado: $('#bookingStatus').val(),
+            tiempo_gracia: parseInt($('#graceTime').val()),
+            precio_total: parseFloat($('#totalPrice').val().split(' ')[0]),
+            servicios: []
+        };
+
+        var isValid = true;
+
+        $('.service-item').each(function() {
+            var serviceId = $(this).data('serviceId');
+            var tipoUsuarioId = $(this).data('employeeId');
+            
+            if (!serviceId || !tipoUsuarioId) {
+                isValid = false;
+                toastr.error('Por favor, seleccione un servicio y un empleado válidos para todos los servicios.');
+                return false;  // Salir del bucle each
+            }
+
+            formData.servicios.push({
+                idservicio: serviceId,
+                idtipo_usuario: tipoUsuarioId,
+                duracion: parseInt($(this).data('duration')),
+                costo: parseFloat($(this).data('price'))
+            });
+        });
+
+        if (!isValid) {
+            return;  // No enviar el formulario si no es válido
+        }
+
+        $.ajax({
+            url: '{% url "agregar_cita" %}',
+            method: 'POST',
+            data: JSON.stringify(formData),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    toastr.success('Cita agendada con éxito');
+                    calendar.refetchEvents();
+                    $('#bookingPanel').removeClass('open');
+                    $('#bookingForm')[0].reset();
+                    $('#serviceList').empty();
+                    actualizarTotales();
+                } else {
+                    toastr.error('Error al agendar la cita: ' + response.error);
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error('Error:', textStatus, errorThrown);
+                console.log('Respuesta del servidor:', jqXHR.responseText);
+                toastr.error('Error al procesar la solicitud: ' + errorThrown);
+            }
+        });
+    });
+    
+    // Configuración de toastr
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "preventDuplicates": true,
+        "newestOnTop": false,
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    };
+
+    // Mostrar mensajes si existen
+    {% if messages %}
+        {% for message in messages %}
+            toastr.{{ message.tags }}('{{ message|escapejs }}');
+        {% endfor %}
+    {% endif %}
+    // Función para generar un color aleatorio pastel
+    function getRandomPastelColor() {
+        var hue = Math.floor(Math.random() * 360);
+        return `hsl(${hue}, 70%, 80%)`;
+    }
+// Inicializar FullCalendar
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+
+        contentHeight: 900,
+        aspectRatio: 1.8,
+        locale: 'es',
+        buttonText: {
+            today: 'Hoy',
+            month: 'Mes',
+            week: 'Semana',
+            day: 'Día',
+            list: 'Lista'
+        },
+        navLinks: true,
+        editable: true,
+        selectable: true,
+        selectMirror: true,
+        nowIndicator: true,
+        dayMaxEvents: true,
+        slotDuration: '00:10:00',
+        slotMinTime: '07:00:00',
+        slotMaxTime: '20:00:00',
+        events: '{% url "obtener_citas" %}',
+        eventDidMount: function(info) {
+            // Asignar un color aleatorio a cada evento
+         info.el.style.backgroundColor = getRandomPastelColor();
+        },
+        eventClick: function(info) {
+            // Mostrar detalles de la cita
+            var event = info.event;
+            var content = `
+                <h3>Detalles de la Cita</h3>
+                <p><strong>Cliente:</strong> ${event.extendedProps.cliente}</p>
+                <p><strong>Fecha:</strong> ${event.start.toLocaleDateString()}</p>
+                <p><strong>Hora:</strong> ${event.start.toLocaleTimeString()} - ${event.end.toLocaleTimeString()}</p>
+                <p><strong>Estado:</strong> ${event.extendedProps.estado}</p>
+                <p><strong>Precio Total:</strong> ${event.extendedProps.precio_total} Gs.</p>
+            `;
+            
+            // Usar toastr para mostrar los detalles
+            toastr.info(content, '', {
+                closeButton: true,
+                timeOut: 0,
+                extendedTimeOut: 0,
+                tapToDismiss: false,
+                progressBar: false,
+                toastClass: 'toastr-info-large'
+            });
+        },
+        select: function(info) {
+            var selectedDate = info.start;
+            var formattedDate = selectedDate.toISOString().split('T')[0];
+            var formattedTime = '';
+
+            if (info.view.type === 'timeGridWeek' || info.view.type === 'timeGridDay') {
+                formattedTime = selectedDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            }
+
+            $('#bookingDate').val(formattedDate);
+            $('#bookingTime').val(formattedTime);
+            $('#bookingPanel').addClass('open');
+            calendar.unselect();
+        }
+    });
+    calendar.render();
+
+    // Toggle sidebar
+    $('.toggle-sidebar').on('click', function() {
+        $('#sidebar, #content').toggleClass('active');
+    });
+});
+    </script>
 </body>
 </html>

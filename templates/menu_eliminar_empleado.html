@@ -1,0 +1,86 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Cargar los íconos desde CDN -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+    <!-- Vincular el archivo de estilos CSS -->
+    <link rel="stylesheet" href="{% static 'eliminar_empleado.css' %}">
+    
+    <title>Salon de belleza - Eliminar Empleado</title>
+</head>
+<body>
+    <!-- Inicio Menu vertical-->
+    <section id="sidebar">
+        <a href="#" class="brand"><img src="{% static 'HairStudiodos.png' %}" alt="Salon Logo"></a>
+        <ul class="side-menu">
+            <li><a href="{% url 'menu' %}" class="activo"><i class='bx bxs-dashboard icon'></i>Menu</a></li>
+            <li class="divider">Principal</li>
+            <li><a href="#"><i class='bx bxs-calendar icon'></i>Calendario</a></li>
+            <li><a href="{% url 'listar_servicios' %}"><i class='bx bxs-widget icon'></i>Servicios</a></li>
+            <li><a href="{% url 'listar_clientes' %}"><i class='bx bxs-user-pin icon'></i>Cliente</a></li>
+            <li><a href="#"><i class='bx bxs-book-content icon'></i>Reporte<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#">Operativo</a></li>
+                    <li><a href="#">Gerencial</a></li>
+                </ul>
+            </li>
+            <li class="divider">Seccion Administrador</li>
+            <li><a href="#"><i class='bx bxs-notepad icon'></i>Ajustes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_empleados' %}">Empleado</a></li>
+                    <li><a href="#">Roles</a></li>
+                </ul>
+            </li>
+        </ul>
+
+        <div class="ads">
+            <div class="wrapper">
+                <a href="{% url 'logout' %}" class="btn-upgrade">Cerrar Sesion</a>
+            </div>
+        </div>
+    </section>
+    <!-- Fin Menu vertical -->
+
+   <!-- Inicio Menu Horizontal -->
+   <section id="content"> 
+        <nav>
+            <i class='bx bx-menu toggle-sidebar'></i>
+            <a href="#" class="nav-link">
+                <i class='bx bxs-bell icon'></i>
+                <span class="badge"></span>
+            </a>
+            
+            <div class="profile">
+                <ul class="profile-link">
+                    <li><a href="#"><i class='bx bxs-user-circle icon'></i></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Adaptación del contenido principal -->
+        <main>
+            <div class="delete-confirmation-container">
+                <h2>¿Estás seguro?</h2>
+                <p>Estás a punto de eliminar el empleado:</p>
+                <p class="font-semibold">"{{ usuario.nombre }} {{ usuario.apellido }}"</p>
+                <p class="important">Esta acción no se puede deshacer.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="button button-primary">Sí, eliminar</button>
+                    <a href="{% url 'listar_empleados' %}" class="button button-secondary">No, cancelar</a>
+                </form>
+            </div>
+        </main>
+   </section>
+   <!-- Fin Menu Horizontal -->
+
+    <!-- Cargar el archivo de scripts JS -->
+    <script src="{% static 'script.js' %}"></script>
+</body>
+</html>

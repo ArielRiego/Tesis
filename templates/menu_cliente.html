@@ -31,6 +31,7 @@
                     <li><a href="#">Gerencial</a></li>
                 </ul>
             </li>
+            {% if user.usuario_administrador %}
             <li class="divider">Seccion Administrador</li>
             <li><a href="#"><i class='bx bxs-notepad icon'></i>Ajustes<i class='bx bxs-chevron-right icon-right'></i></a>
                 <ul class="side-dropdown">
@@ -39,6 +40,7 @@
                     <li><a href="#">Roles</a></li>
                 </ul>
             </li>
+            {% endif %}
         </ul>
 
         <div class="ads">

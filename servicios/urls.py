@@ -6,5 +6,6 @@ urlpatterns = [
     path('servicios/', views.listar_servicios, name='listar_servicios'),
     path('servicios/editar/<int:idservicio>/', views.editar_servicio, name='editar_servicio'),
     path('servicios/eliminar/<int:idservicio>/', views.eliminar_servicio, name='eliminar_servicio'),
+    path('acceso-denegado/', views.acceso_denegado, name='acceso_denegado'),
 ]
 

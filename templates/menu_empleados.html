@@ -1,0 +1,186 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="stylesheet" href="{% static 'style_empleado.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <title>Listado de Empleados - Salon de belleza</title>
+</head>
+<body>
+    <!-- Inicio Menu vertical-->
+    <section id="sidebar">
+        <a href="#" class="brand"><img src="{% static 'HairStudiodos.png' %}" alt="Salon Logo"></a>
+        <ul class="side-menu">
+            <li><a href="{% url 'menu' %}" class="activo"><i class='bx bxs-dashboard icon'></i>Menu</a></li>
+            <li class="divider">Principal</li>
+            <li><a href="#"><i class='bx bxs-calendar icon'></i>Calendario</a></li>
+            <li><a href="{% url 'listar_servicios' %}"><i class='bx bxs-widget icon'></i>Servicios</a></li>
+            <li><a href="{% url 'listar_clientes' %}"><i class='bx bxs-user-pin icon'></i>Cliente</a></li>
+            <li><a href="#"><i class='bx bxs-book-content icon'></i>Reporte<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#">Operativo</a></li>
+                    <li><a href="#">Gerencial</a></li>
+                </ul>
+            </li>
+            {% if user.usuario_administrador %}
+            <li class="divider">Seccion Administrador</li>
+            <li><a href="#"><i class='bx bxs-notepad icon'></i>Ajustes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_empleados' %}">Empleado</a></li>
+                </ul>
+            </li>
+            {% endif %}
+        </ul>
+
+        <div class="ads">
+            <div class="wrapper">
+                <a href="{% url 'logout' %}" class="btn-upgrade">Cerrar Sesion</a>
+            </div>
+        </div>
+    </section>
+   <section id="content"> 
+
+        <nav>
+            <i class='bx bx-menu toggle-sidebar'></i>
+            <a href="#" class="nav-link">
+                <i class='bx bxs-bell icon'></i>
+                <span class="badge"></span>
+            </a>
+            
+            <div class="profile">
+                <ul class="profile-link">
+                    <li><a href="#"><i class='bx bxs-user-circle icon'></i></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Agregar la tabla aquí -->
+        <div class="main-content">
+            <div class="table-container">
+                <div class="table-header">
+                    <h2 class="table-title">Lista de Empleados</h2>
+                    <div class="search-and-add">
+                        <form action="{% url 'listar_empleados' %}" method="GET" class="search-form" id="search-form">
+                            <div class="form-group">
+                                <input type="text" name="q" placeholder="Buscar..." value="{{ query }}">
+                                <i class='bx bx-search icon'></i>
+                            </div>
+                        </form>
+                        {% if user.usuario_administrador %}
+                        <a href="{% url 'agregar_empleado' %}" class="btn-add-service">Agregar Empleado</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <table id="empleados-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Correo</th>
+                            <th>Tipo de Usuario</th>
+                            <th>Fecha de Creación</th>
+                            {% if user.usuario_administrador %}
+                            <th>Acciones</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for empleado in empleados %}
+                        <tr>
+                            <td>{{ empleado.username }}</td>
+                            <td>{{ empleado.nombre }}</td>
+                            <td>{{ empleado.apellido }}</td>
+                            <td>{{ empleado.mail }}</td>
+                            <td>
+                                {% for tipo in empleado.tipos_usuario.all %}
+                                    {{ tipo.descripcion }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>{{ empleado.fechacreacion|date:"d/m/Y H:i" }}</td>
+                            {% if user.usuario_administrador %}
+                            <td>
+                                <a href="{% url 'editar_empleado' empleado.idusuario %}">✎</a>
+                                <a href="{% url 'eliminar_empleado' empleado.idusuario %}">🗑️</a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{% if user.usuario_administrador %}7{% else %}6{% endif %}">No hay empleados disponibles.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    
+        <script>
+        $(document).ready(function() {
+            function performSearch() {
+                var query = $('input[name="q"]').val().toLowerCase();
+                $('#empleados-table tbody tr').each(function() {
+                    var row = $(this);
+                    var text = row.text().toLowerCase();
+                    if(text.indexOf(query) === -1) {
+                        row.hide();
+                    } else {
+                        row.show();
+                    }
+                });
+            }
+    
+            $('input[name="q"]').on('input', function() {
+                performSearch();
+            });
+    
+            $('#search-form').on('submit', function(e) {
+                e.preventDefault();
+                var query = $('input[name="q"]').val();
+                window.location.href = "{% url 'listar_empleados' %}?q=" + encodeURIComponent(query);
+            });
+    
+            if($('input[name="q"]').val()) {
+                performSearch();
+            }
+        });
+        </script>
+   </section>
+   <!-- Fin Menu Horizontal -->
+   <!-- Scripts para los mensajes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "preventDuplicates": true,
+                "newestOnTop": false,
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+            
+            {% if messages %}
+                {% for message in messages %}
+                    toastr.{{ message.tags }}('{{ message|escapejs }}');
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
+    <!-- Cargar el archivo de scripts JS -->
+    <script src="{% static 'script.js' %}"></script>
+</body>
+</html>

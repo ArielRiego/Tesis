@@ -29,4 +29,5 @@ urlpatterns = [
     path('', include('usuarios.urls')),  # Incluye las URLs de la aplicación usuarios
     path('', include('servicios.urls')), # Incluye las URLs de la aplicación servicios
     path('', include('cliente.urls')), # Incluye las URLs de la aplicación cliente
+    path('', include('agendamiento.urls')), # Incluye las URLs de la aplicación agendamiento
 ]

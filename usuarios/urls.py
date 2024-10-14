@@ -25,4 +25,9 @@ urlpatterns = [
     path('inicio/', views.inicio_view, name='inicio'),
     path('menu/', views.menu_view, name='menu'),
     path('logout/', auth_views.LogoutView.as_view(next_page='/login/'), name='logout'),
+    path('empleados/', views.listar_empleados, name='listar_empleados'),
+    path('empleados/agregar/', views.agregar_empleado, name='agregar_empleado'),
+    path('empleados/editar/<int:idusuario>/', views.editar_empleado, name='editar_empleado'),
+    path('empleados/eliminar/<int:idusuario>/', views.eliminar_empleado, name='eliminar_empleado'),
+    path('acceso-denegado/', views.acceso_denegado, name='acceso_denegado'),
 ]
