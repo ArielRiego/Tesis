@@ -105,7 +105,7 @@ class Usuario(AbstractBaseUser):
         return self.tipos_usuario.filter(descripcion=rol).exists()
 
 class UsuarioTipoUsuario(models.Model):
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, db_column='idusuario')
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, db_column='idusuario', primary_key=True)
     tipo_usuario = models.ForeignKey(TipoUsuario, on_delete=models.CASCADE, db_column='idtipousuario')
 
     class Meta:

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-uac-compatible" content="IE-edge">  <!--Se usa para renderizar el sitio web -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salon de belleza</title>
+    <link rel="stylesheet" href="estilo.css">
+
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+</head>
+
+ <!--Login -->
+
+<body>
+    <div class="wrapper"> 
+        <form action="">
+            <h1>Login</h1>
+
+            <div class="input-box">
+                <input type="text" placeholder="Nombre de usuario"
+                required>
+
+                <!--Icono usuario -->
+                <i class='bx bxs-user' ></i>
+            </div>
+
+            <div class="input-box">
+                <input type="password" placeholder="Contraseña" required>
+                
+                <!--Icono candado-->
+                <i class='bx bxs-lock-alt' ></i>
+            </div>
+
+            <!--Recordar-olvidar-->
+            <div class="remember-forgot">
+              <label> <input type="checkbox"> Recuerdame </label>
+              <a href="#">Olvido la contraseña?</a>
+            </div>
+
+            <button type="submit" class="btn">Login</button>
+
+            <!--Registrar-->
+            <div class="register-link">
+                <p>No tienes una cuenta? <a href="#">Registrar</a>
+                </p>
+            </div>
+
+        </form>
+    </div>
+</body>
+</html>

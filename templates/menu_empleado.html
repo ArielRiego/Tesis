@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-uac-compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Cargar los íconos desde CDN -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+    <!-- Vincular el archivo de estilos CSS -->
+    <link rel="stylesheet" href="{% static 'style_cliente.css' %}">
+    <!-- Agregar estilos de Toastr para los mensajes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <title>Salon de belleza - Clientes</title>
+</head>
+<body>
+    <!-- Inicio Menu vertical-->
+    <section id="sidebar">
+        <a href="#" class="brand"><img src="{% static 'HairStudiodos.png' %}" alt="Salon Logo"></a>
+        <ul class="side-menu">
+            <li><a href="{% url 'menu' %}" class="activo"><i class='bx bxs-dashboard icon'></i>Menu</a></li>
+            <li class="divider">Principal</li>
+            <li><a href="#"><i class='bx bxs-calendar icon'></i>Calendario</a></li>
+            <li><a href="{% url 'listar_servicios' %}"><i class='bx bxs-widget icon'></i>Servicios</a></li>
+            <li><a href="{% url 'listar_clientes' %}"><i class='bx bxs-user-pin icon'></i>Cliente</a></li>
+            <li><a href="#"><i class='bx bxs-book-content icon'></i>Reporte<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#">Operativo</a></li>
+                    <li><a href="#">Gerencial</a></li>
+                </ul>
+            </li>
+            <li class="divider">Seccion Administrador</li>
+            <li><a href="#"><i class='bx bxs-notepad icon'></i>Ajustes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#">Servicio</a></li>
+                    <li><a href="#">Empleado</a></li>
+                    <li><a href="#">Roles</a></li>
+                </ul>
+            </li>
+        </ul>
+
+        <div class="ads">
+            <div class="wrapper">
+                <a href="#" class="btn-upgrade">Cerrar Sesion</a>
+            </div>
+        </div>
+    </section>
+    <!-- Fin Menu vertical -->
+
+   <!-- Inicio Menu Horizontal -->
+   <section id="content"> 
+        <nav>
+            <i class='bx bx-menu toggle-sidebar'></i>
+            <a href="#" class="nav-link">
+                <i class='bx bxs-bell icon'></i>
+                <span class="badge"></span>
+            </a>
+            
+            <div class="profile">
+                <ul class="profile-link">
+                    <li><a href="#"><i class='bx bxs-user-circle icon'></i></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Contenido principal -->
+        <div class="main-content">
+            <div class="table-container">
+                <div class="table-header">
+                    <h2 class="table-title">Lista de Clientes</h2>
+                    <div class="search-and-add">
+                        <form action="#" class="search-form">
+                            <div class="form-group">
+                                <input type="text" placeholder="Buscar...">
+                                <i class='bx bx-search icon'></i>
+                            </div>
+                        </form>
+                        <a href="{% url 'agregar_cliente' %}" class="btn-add-client">Agregar Cliente</a>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cédula</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Email</th>
+                            <th>RUC</th>
+                            <th>Teléfono</th>
+                            <th>Historial</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cliente in clientes %}
+                        <tr>
+                            <td>{{ cliente.cedula }}</td>
+                            <td>{{ cliente.nombre }}</td>
+                            <td>{{ cliente.apellido }}</td>
+                            <td>{{ cliente.email }}</td>
+                            <td>{{ cliente.ruc }}</td>
+                            <td>{{ cliente.telefono }}</td>
+                            <td>
+                                <a href="#"><i class='bx bxs-book-open'></i></a>
+                            </td>
+                            <td>
+                                <a href="{% url 'editar_cliente' cedula=cliente.cedula %}"><i class='bx bxs-edit'></i></a>
+                                <a href="{% url 'eliminar_cliente' cedula=cliente.cedula %}"><i class='bx bxs-trash'></i></a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8">No hay clientes registrados.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+   </section>
+   <!-- Fin Menu Horizontal -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "preventDuplicates": true,
+                "newestOnTop": false,
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+            
+            {% if messages %}
+                {% for message in messages %}
+                    toastr.{{ message.tags }}('{{ message|escapejs }}');
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
+    <!-- Cargar el archivo de scripts JS -->
+    <script src="{% static 'script.js' %}"></script>
+</body>
+</html>

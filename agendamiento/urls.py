@@ -10,5 +10,9 @@ urlpatterns = [
     path('obtener-id-servicio/', views.obtener_id_servicio, name='obtener_id_servicio'),
     path('obtener-id-empleado/', views.obtener_id_empleado, name='obtener_id_empleado'),
     path('obtener-citas/', views.obtener_citas, name='obtener_citas'),
-   # path('obtener-citas/', views.obtener_citas, name='obtener_citas'),
+    path('editar-cita/', views.editar_cita, name='editar_cita'),
+    path('eliminar-cita/', views.eliminar_cita, name='eliminar_cita'),
+    path('servicios-inmediatos/', views.servicios_inmediatos, name='servicios_inmediatos'),
+    path('agregar-servicio/', views.agregar_servicio_inmediato, name='agregar_servicio_inmediato'),
+    path('confirmar-cita/', views.confirmar_cita, name='confirmar_cita'),
 ]

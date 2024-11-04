@@ -16,36 +16,128 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     
     <title>Salon de belleza - Agregar Servicio</title>
+
+    
+    <style>
+        /* Menú Horizontal (Barra de navegación superior) */
+        #content nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+
+        /* Menú Vertical (Panel deslizante) */
+        .sliding-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background-color: #fff;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            transition: right 0.3s ease-in-out;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sliding-panel.open {
+            right: 0;
+        }
+
+        .close-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Estilos comunes para elementos de menú */
+        a {
+            text-decoration: none;
+        }
+    </style>
+
 </head>
 <body>
     <!-- Inicio Menu vertical-->
-    <section id="sidebar">
+    <section id="sidebar" id="sidebar" style="box-shadow: 2px 0 5px rgba(0,0,0,0.1);">
         <a href="#" class="brand"><img src="{% static 'HairStudiodos.png' %}" alt="Salon Logo"></a>
         <ul class="side-menu">
             <li><a href="#" class="activo"><i class='bx bxs-dashboard icon'></i>Menu</a></li>
-            <li class="divider">Principal</li>
-            <li><a href="#"><i class='bx bxs-calendar icon'></i>Calendario</a></li>
-            <li><a href="{% url 'listar_servicios' %}"><i class='bx bxs-widget icon'></i>Servicios</a></li>
-            <li><a href="#"><i class='bx bxs-user-pin icon'></i>Cliente</a></li>
-            <li><a href="#"><i class='bx bxs-book-content icon'></i>Reporte<i class='bx bxs-chevron-right icon-right'></i></a>
+            <li class="divider">Menu</li>
+            
+            <li>
+                <a href="#"><i class='bx bxs-book-heart icon'></i>Agenda<i class='bx bxs-chevron-right icon-right'></i></a>
                 <ul class="side-dropdown">
-                    <li><a href="#">Operativo</a></li>
-                    <li><a href="#">Gerencial</a></li>
+                    <li><a href="{% url 'menu' %}"> > Citas Agendadas</a></li>
+                    <li><a href="{% url 'servicios_inmediatos' %}"> > Servicios Inmediatos</a></li>
                 </ul>
             </li>
-            <li class="divider">Seccion Administrador</li>
-            <li><a href="#"><i class='bx bxs-notepad icon'></i>Ajustes<i class='bx bxs-chevron-right icon-right'></i></a>
+           
+            <li>
+                <a href="#"><i class='bx bx-list-ul icon'></i>Servicios<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_servicios' %}"> > Lista de Servicios</a></li>
+                    <li><a href=""> > Historial de Servicios</a></li>
+                </ul>
+            </li>
+           
+            <li>
+                <a href="#"><i class='bx bxs-group icon'></i>Clientes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_clientes' %}"> > Lista de Cliente</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class='bx bx-money icon'></i>Pagos<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'menu_pago' %}"> > Gestión de Pagos</a></li>
+                    <li><a href=""> > Historial de Pagos</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class='bx bx-file icon'></i>Reportes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#"> > Ventas</a></li>
+                    <li><a href="#"> > Servicios Populares</a></li>
+                    <li><a href="#"> > Rendimiento de Empleados</a></li>
+                    <li><a href="#"> > Análisis de Citas vs. Servicios Inmediatos</a></li>
+                </ul>
+            </li>
+
+
+            {% if user.usuario_administrador %}
+            <li class="divider">Seccion Administrador</li> 
+            <li>
+                <a href="#"><i class='bx bxs-cog icon'></i>Configuración<i class='bx bxs-chevron-right icon-right'></i></a>
                 <ul class="side-dropdown">
                     <li><a href="#">Servicio</a></li>
                     <li><a href="#">Empleado</a></li>
                     <li><a href="#">Roles</a></li>
                 </ul>
             </li>
+
+            <li>
+                <a href="#"><i class='bx bx-id-card icon'></i>Empleados<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_empleados' %}"> > Lista de Empleados</a></li>
+                    <li><a href=""> > Gestión de Horarios</a></li>
+                </ul>
+            </li>
+            {% endif %}
+            
         </ul>
 
         <div class="ads">
             <div class="wrapper">
-                <a href="{% url 'logout' %}" class="btn-upgrade">Cerrar Sesion</a>
+                <a href="{% url 'logout' %}" class="btn-upgrade">Cerrar Sesión</a>
             </div>
         </div>
     </section>
@@ -54,21 +146,15 @@
     <!-- Inicio Menu Horizontal -->
      <section id="content"> 
         
-            <nav>
-                <i class='bx bx-menu toggle-sidebar'></i>
-                <a href="#" class="nav-link">
-                    <i class='bx bxs-bell icon'></i>
-                    <span class="badge"></span>
-                </a>
-                
-                <div class="profile">
-                    <ul class="profile-link">
-                        <li><a href="#"><i class='bx bxs-user-circle icon'></i></a></li>
-                    </ul>
-                </div>
-            </nav>
-
-    
+        <nav>
+            <div class="">
+                    
+            </div>
+            <div class="nav-icons">
+                <i class='bx bxs-bell nav-icon'></i>
+                <i class='bx bxs-user-circle nav-icon'></i>
+            </div>
+        </nav>
 
         <!-- Contenido principal - Agregar Servicio -->
         <div class="main-content">

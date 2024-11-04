@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-uac-compatible" content="IE-edge"> <!-- Se usa para renderizar el sitio web -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salon de belleza</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'estilo1.css' %}">
+
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+</head>
+
+<!-- Menu principal -->
+<body>
+    <header>
+        <nav>
+            <h1>Logo</h1>
+            <ul>
+                <li><a href="#">Inicio</a></li>
+                <li><a href="#">Servicios</a></li>
+                <li><a href="#">Contactos</a></li>
+                <li><a href="#">Sobre Nosotros</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Sección de mensajes -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        {% if messages %}
+            $(document).ready(function() {
+                {% for message in messages %}
+                    toastr.options = {
+                        "closeButton": true,
+                        "progressBar": true,
+                        "positionClass": "toast-top-right",  // Posición en la parte superior derecha
+                        "timeOut": "5000",  // Duración del mensaje
+                    };
+                    toastr.{{ message.tags }}('{{ message|escapejs }}');
+                {% endfor %}
+            });
+        {% endif %}
+    </script>
+
+</body>
+</html>

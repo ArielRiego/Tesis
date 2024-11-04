@@ -24,3 +24,4 @@ allDropdown.forEach(item=> {
         item.classList.toggle ('show');
     })
 })
+

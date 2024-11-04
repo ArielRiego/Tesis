@@ -1,0 +1,51 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+  }
+
+  
+/*Cuerpo en general*/
+
+body {  
+    min-height: 100vh; /*agranda la imagen*/
+    background: url('FondoPrincipal.jpg') no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+
+/*Menu de arriba*/
+nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 20px;
+    padding-left: 5%;
+    padding-right: 5%;
+    font-weight: bold;
+    
+
+}
+
+/*Texto*/
+
+h1 {
+    color: #fff;
+    font-size:  45px;
+}
+
+ul li {
+    display: inline-block;
+    margin: 0 30px;
+ 
+}
+
+a {
+  
+    color: #fff;
+    text-decoration: none;
+}
+
+a:hover {
+    color: blueviolet;
+}

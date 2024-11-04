@@ -14,56 +14,211 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- FullCalendar CSS -->
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.css' rel='stylesheet' />
-    
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.css' rel='stylesheet' /> 
+    <link rel="stylesheet" href="https://unpkg.com/tooltip.js/dist/tooltip.min.css">
+    <script src="https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" />
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    
+
     <title>Salon de belleza - Calendario de Citas</title>
     <style>
-        #calendar {
-        max-width: 1700px;
-        margin: 0 auto;
+
+            /* General Styles */
+        body, a {
+            text-decoration: none;
         }
-        /* Estilos para hacer el calendario más compacto */
+
+        /* Layout Styles */
+        #content {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin-left: 260px; /* Ancho del sidebar */
+            width: calc(100% - 260px); /* Ancho total menos el ancho del sidebar */
+        }
+
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1001; /* Mayor que el z-index de la barra de navegación */
+        }
+
+        /* Navigation Styles */
+        #content nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-icons {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            color: #000;
+            margin-left: 1rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .nav-icon:hover {
+            color: #555;
+        }
+
+        /* Calendar Styles */
+        .calendar-content {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #calendar {
+            width: 100%;
+            height: auto;
+            min-height: 600px;
+        }
+
+        .fc {
+            color: #333333;
+            font-size: 14px;
+        }
+
         .fc .fc-daygrid-day-frame {
             min-height: 50px;
-            
         }
+
+        .fc .fc-daygrid-day-number,
+        .fc-event-title,
+        .fc-col-header-cell-cushion {
+            color: #333333;
+        }
+
+        .fc-col-header-cell-cushion {
+            color: rgb(228, 16, 80);
+        }
+
+        .fc-col-header-cell-cushion:hover {
+            color: #f597be;
+        }
+
         .fc .fc-daygrid-day-top {
             flex-direction: row;
             font-size: 0.9em;
         }
+
         .fc .fc-daygrid-day-number {
             padding: 2px;
         }
+
         .fc .fc-daygrid-event {
             font-size: 0.8em;
             padding: 1px 2px;
         }
+
         .fc .fc-toolbar-title {
             font-size: 1.2em;
         }
-        .fc .fc-button {
+
+        /* Calendar Button Styles */
+        .fc .fc-button-group > .fc-button,
+        .fc .fc-today-button {
+            border: none !important;
+            margin: 0;
+            border-radius: 5px;
+            transition: all 0.3s ease;
             font-size: 0.9em;
             padding: 0.3em 0.6em;
         }
 
-        /* Estilos para el toastr de detalles de cita */
+        .fc .fc-button-group {
+            gap: 1px;
+        }
+
+        .fc .fc-button-primary {
+            background-color: #eb9ac0;
+            border-color: #eb9ac0;
+            color: white;
+        }
+
+        .fc .fc-button-primary:not(:disabled).fc-button-active,
+        .fc .fc-button-primary:not(:disabled):active {
+            background-color: rgba(228, 16, 80, 0.281);
+        }
+
+        .fc .fc-button-primary:hover {
+            background-color: #fbd5e5;
+            border-color: #fbd5e5;
+        }
+
+        .fc .fc-button-primary:focus,
+        .fc .fc-button-primary:active,
+        .fc .fc-button-primary.fc-button-active,
+        .fc .fc-today-button:focus,
+        .fc .fc-today-button:active {
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+        /* Event Styles */
+        .fc-event-options {
+            background-color: rgb(255, 255, 255);
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 8px 0;
+        }
+
+        .fc-event-option {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+
+        .fc-event-option:hover {
+            background-color: #f0f0f0;
+        }
+
+        .fc-event-option-secondary {
+            border-top: 1px solid #e0e0e0;
+            color: rgb(228, 16, 80);
+            font-weight: 500;
+        }
+
+        /* Tooltip Styles */
+        .tippy-box[data-theme~='light-border'] {
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            color: black;
+        }
+
+        /* Toast Styles */
         .toastr-info-large {
             width: 350px !important;
             max-width: 100%;
         }
+
         .toastr-info-large .toast-message {
             font-size: 14px;
-            .toastr-info-large {
-            width: 350px !important;
-            max-width: 100%;
-            }
-            .toastr-info-large .toast-message {
-                font-size: 14px;
-            }
-        } 
+        }
+
+        /* Sliding Panel Styles */
         .sliding-panel {
             position: fixed;
             top: 0;
@@ -76,9 +231,11 @@
             z-index: 1000;
             overflow-y: auto;
         }
+
         .sliding-panel.open {
             right: 0;
         }
+
         .close-panel {
             position: absolute;
             top: 10px;
@@ -86,66 +243,126 @@
             font-size: 24px;
             cursor: pointer;
         }
+
         #serviceList {
             margin-top: 20px;
         }
+
         .service-item {
             border: 1px solid #ddd;
             padding: 10px;
             margin-bottom: 10px;
             border-radius: 5px;
         }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            #content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            #sidebar {
+                position: fixed;
+                left: -260px;
+                transition: left 0.3s ease-in-out;
+            }
+
+            #sidebar.active {
+                left: 0;
+            }
+        }
     </style>
 </head>
 <body>
     <!-- Inicio Menu vertical-->
-    <section id="sidebar">
+    <section id="sidebar" id="sidebar" style="box-shadow: 2px 0 5px rgba(0,0,0,0.1);">
         <a href="#" class="brand"><img src="{% static 'HairStudiodos.png' %}" alt="Salon Logo"></a>
         <ul class="side-menu">
-            <li><a href="{% url 'menu' %}" class="activo"><i class='bx bxs-dashboard icon'></i>Menu</a></li>
-            <li class="divider">Principal</li>
-            <li><a href="#"><i class='bx bxs-calendar icon'></i>Calendario</a></li>
-            <li><a href="{% url 'listar_servicios' %}"><i class='bx bxs-widget icon'></i>Servicios</a></li>
-            <li><a href="{% url 'listar_clientes' %}"><i class='bx bxs-user-pin icon'></i>Cliente</a></li>
+            <li><a href="#" class="activo"><i class='bx bxs-dashboard icon'></i>Menu</a></li>
+            <li class="divider">Menu</li>
+            
             <li>
-                <a href="#"><i class='bx bxs-book-content icon'></i>Reporte<i class='bx bxs-chevron-right icon-right'></i></a>
+                <a href="#"><i class='bx bxs-book-heart icon'></i>Agenda<i class='bx bxs-chevron-right icon-right'></i></a>
                 <ul class="side-dropdown">
-                    <li><a href="#">Operativo</a></li>
-                    <li><a href="#">Gerencial</a></li>
+                    <li><a href="{% url 'menu' %}"> > Citas Agendadas</a></li>
+                    <li><a href="{% url 'servicios_inmediatos' %}"> > Servicios Inmediatos</a></li>
                 </ul>
             </li>
-            <li class="divider">Seccion Administrador</li>
+           
             <li>
-                <a href="#"><i class='bx bxs-notepad icon'></i>Ajustes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <a href="#"><i class='bx bx-list-ul icon'></i>Servicios<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_servicios' %}"> > Lista de Servicios</a></li>
+                    <li><a href=""> > Historial de Servicios</a></li>
+                </ul>
+            </li>
+           
+            <li>
+                <a href="#"><i class='bx bxs-group icon'></i>Clientes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_clientes' %}"> > Lista de Cliente</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class='bx bx-money icon'></i>Pagos<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'menu_pago' %}"> > Gestión de Pagos</a></li>
+                    <li><a href=""> > Historial de Pagos</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class='bx bx-file icon'></i>Reportes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#"> > Ventas</a></li>
+                    <li><a href="{% url 'servicios_populares' %}"> > Servicios Populares</a></li>
+                    <li><a href="#"> > Rendimiento de Empleados</a></li>
+                    <li><a href="#"> > Análisis de Citas vs. Servicios Inmediatos</a></li>
+                </ul>
+            </li>
+
+
+            {% if user.usuario_administrador %}
+            <li class="divider">Seccion Administrador</li> 
+            <li>
+                <a href="#"><i class='bx bxs-cog icon'></i>Configuración<i class='bx bxs-chevron-right icon-right'></i></a>
                 <ul class="side-dropdown">
                     <li><a href="#">Servicio</a></li>
                     <li><a href="#">Empleado</a></li>
                     <li><a href="#">Roles</a></li>
                 </ul>
             </li>
+
+            <li>
+                <a href="#"><i class='bx bx-id-card icon'></i>Empleados<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_empleados' %}"> > Lista de Empleados</a></li>
+                    <li><a href=""> > Gestión de Horarios</a></li>
+                </ul>
+            </li>
+            {% endif %}
+            
         </ul>
 
         <div class="ads">
             <div class="wrapper">
-                <a href="{% url 'logout' %}" class="btn-upgrade">Cerrar Sesion</a>
+                <a href="{% url 'logout' %}" class="btn-upgrade">Cerrar Sesión</a>
             </div>
         </div>
     </section>
     <!-- Fin Menu vertical -->
 
-    <!-- Inicio Menu Horizontal y Contenido -->
-    <section id="content"> 
+     <!-- Inicio Menu Horizontal y Contenido -->
+     <section id="content"> 
         <nav>
-            <i class='bx bx-menu toggle-sidebar'></i>
-            <a href="#" class="nav-link">
-                <i class='bx bxs-bell icon'></i>
-                <span class="badge"></span>
-            </a>
-            
-            <div class="profile">
-                <ul class="profile-link">
-                    <li><a href="#"><i class='bx bxs-user-circle icon'></i></a></li>
-                </ul>
+            <div class="">
+                
+            </div>
+            <div class="nav-icons">
+                <i class='bx bxs-bell nav-icon'></i>
+                <i class='bx bxs-user-circle nav-icon'></i>
             </div>
         </nav>
 
@@ -158,7 +375,7 @@
     </section>
     <!-- Fin Menu Horizontal y Contenido -->
 
-    <!-- Panel deslizante para agendar citas -->
+    <!-- Panel deslizante para agendar citas de la derecha -->
     <div id="bookingPanel" class="sliding-panel">
         <span class="close-panel">&times;</span>
         <div class="p-3">
@@ -238,6 +455,56 @@
         </div>
     </div>
 
+    <!-- Panel deslizante para Datos Citas -->
+    <div id="datosPanel" class="sliding-panel">
+        <span class="close-panel">&times;</span>
+        <div class="p-3">
+            <h2 class="mb-3">Datos Cita</h2>
+            <form id="datosForm">
+                <div class="mb-3">
+                    <label for="datosClient" class="form-label">Cliente</label>
+                    <input type="text" class="form-control" id="datosClient" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="datosDate" class="form-label">Fecha</label>
+                    <input type="date" class="form-control" id="datosDate" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="datosTime" class="form-label">Hora</label>
+                    <input type="time" class="form-control" id="datosTime" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="datosStatus" class="form-label">Estado</label>
+                    <input type="text" class="form-control" id="datosStatus" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="datosServices" class="form-label">Servicios</label>
+                    <div id="datosServiceList"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="datosTotalDuration" class="form-label">Duración total</label>
+                    <input type="text" class="form-control" id="datosTotalDuration" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="datosTotalPrice" class="form-label">Precio total</label>
+                    <input type="text" class="form-control" id="datosTotalPrice" readonly>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{% url 'menu_pago' %}?idcita={{ cita.idcita }}" id="procesarPago" class="btn btn-success text-white text-decoration-none">Procesar Pago</a>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            ...
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                            <li><a class="dropdown-item text-primary" href="#" id="confirmarCita" data-cita-id="">Confirmar</a></li>
+                            <li><a class="dropdown-item text-danger" href="#" id="inasistenciaCita">Inasistencia</a></li>
+                            <li><a class="dropdown-item text-danger" href="#" id="cancelarCita">Cancelar cita</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
@@ -249,7 +516,7 @@
     
     <script>
 $(document).ready(function() {
-    // Función para cargar los clientes
+    // Función para cargar los clientes (sin cambios)
     function cargarClientes() {
         $.ajax({
             url: '{% url "obtener_clientes" %}',
@@ -272,7 +539,7 @@ $(document).ready(function() {
         });
     }
 
-    // Función para cargar servicios
+    // Función para cargar servicios (sin cambios)
     function cargarServicios() {
         $.ajax({
             url: '{% url "obtener_servicios" %}',
@@ -297,7 +564,7 @@ $(document).ready(function() {
         });
     }
 
-    // Actualizar campos de duración y precio cuando se selecciona un servicio
+    // Actualizar campos de duración y precio cuando se selecciona un servicio (sin cambios)
     $('#service').on('change', function() {
         var selectedOption = $(this).find('option:selected');
         var duration = selectedOption.data('duration');
@@ -307,7 +574,7 @@ $(document).ready(function() {
         $('#servicePrice').val(price);
     });
 
-    // Función para cargar los empleados
+    // Función para cargar los empleados (sin cambios)
     function cargarEmpleados() {
         $.ajax({
             url: '{% url "obtener_empleados" %}',
@@ -330,7 +597,7 @@ $(document).ready(function() {
         });
     }
 
-    // Inicializar Select2 para la búsqueda de clientes, servicios y empleados
+    // Inicializar Select2 para la búsqueda de clientes, servicios y empleados (sin cambios)
     $('#client, #service, #employee').select2({
         placeholder: 'Buscar...',
         allowClear: true,
@@ -342,24 +609,24 @@ $(document).ready(function() {
         minimumInputLength: 0
     });
 
-    // Cargar datos iniciales
+    // Cargar datos iniciales (sin cambios)
     cargarClientes();
     cargarServicios();
     cargarEmpleados();
 
-    // Manejar clic en botón "Añadir Servicio"
+    // Manejar clic en botón "Añadir Servicio" (sin cambios)
     $('#addServiceBtn').on('click', function() {
         cargarServicios();
         cargarEmpleados();
         $('#servicePanel').addClass('open');
     });
 
-    // Cerrar panel de servicio
+    // Cerrar panel de servicio (sin cambios)
     $('.close-panel').on('click', function() {
         $(this).closest('.sliding-panel').removeClass('open');
     });
 
-    // Función para calcular y actualizar la duración total y el precio total
+    // Función para calcular y actualizar la duración total y el precio total (sin cambios)
     function actualizarTotales() {
         var duracionTotal = 0;
         var precioTotal = 0;
@@ -370,8 +637,9 @@ $(document).ready(function() {
         $('#totalDuration').val(duracionTotal + ' minutos');
         $('#totalPrice').val(precioTotal.toFixed(0) + ' Gs.');
     }
-// Función para obtener el ID del servicio por su nombre
-function obtenerIdServicio(nombreServicio) {
+
+    // Función para obtener el ID del servicio por su nombre (sin cambios)
+    function obtenerIdServicio(nombreServicio) {
         return new Promise((resolve, reject) => {
             $.ajax({
                 url: '{% url "obtener_id_servicio" %}',
@@ -391,8 +659,8 @@ function obtenerIdServicio(nombreServicio) {
         });
     }
 
- // Nueva función para obtener el ID del empleado por su nombre
- function obtenerIdEmpleado(nombreEmpleado) {
+    // Nueva función para obtener el ID del empleado por su nombre (sin cambios)
+    function obtenerIdEmpleado(nombreEmpleado) {
         return new Promise((resolve, reject) => {
             $.ajax({
                 url: '{% url "obtener_id_empleado" %}',
@@ -411,8 +679,39 @@ function obtenerIdServicio(nombreServicio) {
             });
         });
     }
+    $('#confirmarCita').on('click', function(e) {
+        e.preventDefault();
+        var citaId = $(this).data('cita-id');
+        
+        if (!citaId) {
+            toastr.error('No se pudo obtener el ID de la cita');
+            return;
+        }
 
-    // Manejar envío del formulario de servicio
+        $.ajax({
+            url: '{% url "confirmar_cita" %}',
+            type: 'POST',
+            data: JSON.stringify({ id_cita: citaId }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            success: function(response) {
+                if (response.success) {
+                    toastr.success(response.message);
+                    $('#datosPanel').removeClass('open');
+                    calendar.refetchEvents();  // Actualizar el calendario
+                } else {
+                    toastr.error(response.message || 'Error al confirmar la cita');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                toastr.error('Error al confirmar la cita');
+            }
+        });
+    });
+    // Manejar envío del formulario de servicio (sin cambios)
     $('#serviceForm').on('submit', function(e) {
         e.preventDefault();
         var servicioTexto = $('#service option:selected').text();
@@ -450,14 +749,13 @@ function obtenerIdServicio(nombreServicio) {
         }
     });
 
-
-    // Eliminar servicio de la lista
+    // Eliminar servicio de la lista (sin cambios)
     $(document).on('click', '.remove-service', function() {
         $(this).closest('.service-item').remove();
         actualizarTotales();
     });
 
-    // Manejar el envío del formulario principal
+    // Manejar el envío del formulario principal (sin cambios)
     $('#bookingForm').on('submit', function(e) {
         e.preventDefault();
         
@@ -523,7 +821,7 @@ function obtenerIdServicio(nombreServicio) {
         });
     });
     
-    // Configuración de toastr
+    // Configuración de toastr (sin cambios)
     toastr.options = {
         "closeButton": true,
         "progressBar": true,
@@ -538,18 +836,20 @@ function obtenerIdServicio(nombreServicio) {
         "hideMethod": "fadeOut"
     };
 
-    // Mostrar mensajes si existen
+    // Mostrar mensajes si existen (sin cambios)
     {% if messages %}
         {% for message in messages %}
             toastr.{{ message.tags }}('{{ message|escapejs }}');
         {% endfor %}
     {% endif %}
-    // Función para generar un color aleatorio pastel
+
+    // Función para generar un color aleatorio pastel (sin cambios)
     function getRandomPastelColor() {
         var hue = Math.floor(Math.random() * 360);
         return `hsl(${hue}, 70%, 80%)`;
     }
-// Inicializar FullCalendar
+
+    // Inicializar FullCalendar
     var calendarEl = document.getElementById('calendar');
     var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
@@ -558,8 +858,7 @@ function obtenerIdServicio(nombreServicio) {
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
-
-        contentHeight: 900,
+        contentHeight: 550,
         aspectRatio: 1.8,
         locale: 'es',
         buttonText: {
@@ -578,55 +877,359 @@ function obtenerIdServicio(nombreServicio) {
         slotDuration: '00:10:00',
         slotMinTime: '07:00:00',
         slotMaxTime: '20:00:00',
-        events: '{% url "obtener_citas" %}',
-        eventDidMount: function(info) {
-            // Asignar un color aleatorio a cada evento
-         info.el.style.backgroundColor = getRandomPastelColor();
-        },
-        eventClick: function(info) {
-            // Mostrar detalles de la cita
-            var event = info.event;
-            var content = `
-                <h3>Detalles de la Cita</h3>
-                <p><strong>Cliente:</strong> ${event.extendedProps.cliente}</p>
-                <p><strong>Fecha:</strong> ${event.start.toLocaleDateString()}</p>
-                <p><strong>Hora:</strong> ${event.start.toLocaleTimeString()} - ${event.end.toLocaleTimeString()}</p>
-                <p><strong>Estado:</strong> ${event.extendedProps.estado}</p>
-                <p><strong>Precio Total:</strong> ${event.extendedProps.precio_total} Gs.</p>
-            `;
-            
-            // Usar toastr para mostrar los detalles
-            toastr.info(content, '', {
-                closeButton: true,
-                timeOut: 0,
-                extendedTimeOut: 0,
-                tapToDismiss: false,
-                progressBar: false,
-                toastClass: 'toastr-info-large'
+        events: function(fetchInfo, successCallback, failureCallback) {
+            $.ajax({
+                url: '{% url "obtener_citas" %}',
+                type: 'GET',
+                success: function(response) {
+                    var filteredEvents = response.filter(function(event) {
+                        return event.extendedProps.estado === 'programada' || event.extendedProps.estado === 'pendiente';
+                    });
+                    successCallback(filteredEvents);
+                },
+                error: function(error) {
+                    failureCallback(error);
+                }
             });
         },
+        eventDidMount: function(info) {
+            // Asignar un color aleatorio a cada evento
+            info.el.style.backgroundColor = getRandomPastelColor();
+
+            // Añadir tooltip para mostrar detalles al pasar el mouse solo en vistas de mes y semana
+            if (calendar.view.type !== 'timeGridDay') {
+                tippy(info.el, {
+                    content: `
+                        <strong>Cliente:</strong> ${info.event.extendedProps.cliente}<br>
+                        <strong>Fecha:</strong> ${info.event.start.toLocaleDateString()}<br>
+                        <strong>Hora:</strong> ${info.event.start.toLocaleTimeString()} - ${info.event.end.toLocaleTimeString()}<br>
+                        <strong>Estado:</strong> ${info.event.extendedProps.estado}<br>
+                        <strong>Precio Total:</strong> ${info.event.extendedProps.precio_total} Gs.
+                    `,
+                    allowHTML: true,
+                    placement: 'left',
+                    interactive: true,
+                    theme: 'light-border'
+                });
+            }
+        },
+        eventClick: function(info) {
+            if (calendar.view.type === 'timeGridWeek' || calendar.view.type === 'timeGridDay') {
+            // En las vistas semanal y diaria, no hacemos nada al hacer clic en un evento
+                mostrarDatosCita(info.event);
+            return;
+        }
+            info.jsEvent.preventDefault();
+            
+            // Cerrar cualquier menú de opciones abierto previamente
+            $('.fc-event-options').remove();
+            
+            var event = info.event;
+            var optionsHtml = `
+                <div class="fc-event-options" data-event-id="${event.id}">
+                    <div class="fc-event-option" data-action="edit">
+                        <i class="fas fa-edit"></i> Editar cita
+                    </div>
+                    <div class="fc-event-option fc-event-option-secondary" data-action="delete">
+                        <i class="fas fa-trash-alt"></i> Eliminar cita
+                    </div>
+                </div>
+            `;
+            
+            // Agregar el menú de opciones justo después del evento en el calendario
+            $(info.el).after(optionsHtml);
+            
+            // Posicionar el menú de opciones
+            var $options = $('.fc-event-options');
+            var eventRect = info.el.getBoundingClientRect();
+            $options.css({
+                position: 'absolute',
+                top: eventRect.bottom + 'px',
+                left: eventRect.left + 'px',
+                zIndex: 1000
+            });
+            
+            // Detener la propagación del clic para evitar que el documento lo cierre inmediatamente
+            $options.on('click', function(e) {
+                e.stopPropagation();
+            });
+        
+            // Crear y mostrar el popup
+            window.currentTooltip = tippy(info.el, {
+                content: optionsHtml,
+                allowHTML: true,
+                interactive: true,
+                trigger: 'manual',
+                placement: 'bottom',
+                theme: 'light-border',
+                onShow(instance) {
+                    setTimeout(() => {
+                        instance.setProps({ trigger: 'mouseenter focus' });
+                    }, 0);
+                },
+                onHide(instance) {
+                    instance.destroy();
+                    window.currentTooltip = null;
+                }
+            });
+
+            window.currentTooltip.show();
+        },
         select: function(info) {
+        // Siempre abrir el panel de nueva cita en las vistas semanal y diaria
+        if (calendar.view.type === 'timeGridWeek' || calendar.view.type === 'timeGridDay' || !window.currentTooltip) {
             var selectedDate = info.start;
             var formattedDate = selectedDate.toISOString().split('T')[0];
-            var formattedTime = '';
-
-            if (info.view.type === 'timeGridWeek' || info.view.type === 'timeGridDay') {
-                formattedTime = selectedDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-            }
-
+            var formattedTime = selectedDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            
             $('#bookingDate').val(formattedDate);
             $('#bookingTime').val(formattedTime);
             $('#bookingPanel').addClass('open');
-            calendar.unselect();
+
         }
-    });
+        calendar.unselect();
+    }
+});
     calendar.render();
 
-    // Toggle sidebar
-    $('.toggle-sidebar').on('click', function() {
-        $('#sidebar, #content').toggleClass('active');
+    // Manejar clics en las opciones del evento
+    $(document).on('click', '.fc-event-option', function(e) {
+        e.stopPropagation();
+        var action = $(this).data('action');
+        var eventId = $(this).closest('.fc-event-options').data('event-id');
+        var event = calendar.getEventById(eventId);
+        
+        if (event) {
+            switch(action) {
+                case 'edit':
+                    editarCita(event);
+                    break;
+                case 'delete':
+                    eliminarCita(event);
+                    break;
+            }
+        } else {
+            console.error('No se pudo encontrar el evento con ID:', eventId);
+            toastr.error('Error: No se pudo encontrar la cita seleccionada');
+        }
+        
+        // Cerrar el menú de opciones después de hacer clic en una opción
+        $('.fc-event-options').remove();
+    
+        // Cerrar el tooltip después de hacer clic en una opción
+        if (window.currentTooltip) {
+            window.currentTooltip.hide();
+        }
     });
+
+    // Cerrar el menú de opciones al hacer clic fuera de él
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.fc-event, .fc-event-options').length) {
+            $('.fc-event-options').remove();
+        }
+    });
+    
+    // Cerrar el tooltip al hacer clic fuera de él
+    $(document).on('click', function(e) {
+    if (!$(e.target).closest('.tippy-box').length) {
+        if (window.currentTooltip) {
+            window.currentTooltip.hide();
+            window.currentTooltip = null;  // Añadir esta línea
+        }
+        $('.fc-event-options').remove();
+    }
 });
-    </script>
+
+    function editarCita(event) {
+        // Cerrar el panel de nueva cita si está abierto
+        $('#bookingPanel').removeClass('open');
+        
+        // Abrir un modal o panel de edición
+        $('#editCitaModal').modal('show');
+        
+        // Rellenar el formulario con los datos actuales de la cita
+        $('#editCitaForm #fecha').val(event.start.toISOString().split('T')[0]);
+        $('#editCitaForm #hora_inicio').val(event.start.toTimeString().split(' ')[0].substr(0, 5));
+        $('#editCitaForm #estado').val(event.extendedProps.estado);
+        $('#editCitaForm #tiempo_gracia').val(event.extendedProps.tiempo_gracia);
+        
+        // Rellenar los servicios (esto dependerá de cómo esté estructurado tu formulario)
+        var serviciosContainer = $('#editCitaForm #servicios');
+        serviciosContainer.empty();
+        event.extendedProps.servicios.forEach(function(servicio, index) {
+            serviciosContainer.append(`
+                <div class="servicio-item">
+                    <select name="servicio_${index}" class="servicio-select">
+                        <!-- Opciones de servicios -->
+                    </select>
+                    <select name="empleado_${index}" class="empleado-select">
+                        <!-- Opciones de empleados -->
+                    </select>
+                </div>
+            `);
+            // Aquí deberías cargar las opciones de servicios y empleados y seleccionar los valores correctos
+        });
+        
+        // Manejar el envío del formulario de edición
+        $('#editCitaForm').off('submit').on('submit', function(e) {
+            e.preventDefault();
+            var formData = $(this).serializeArray();
+            var citaData = {
+                cita_id: event.id,
+                fecha: formData.find(item => item.name === 'fecha').value,
+                hora_inicio: formData.find(item => item.name === 'hora_inicio').value,
+                estado: formData.find(item => item.name === 'estado').value,
+                tiempo_gracia: formData.find(item => item.name === 'tiempo_gracia').value,
+                servicios: []
+            };
+            
+            // Recopilar los datos de los servicios
+            $('.servicio-item').each(function(index) {
+                citaData.servicios.push({
+                    idservicio: $(this).find('.servicio-select').val(),
+                    idtipo_usuario: $(this).find('.empleado-select').val()
+                });
+            });
+            
+            // Enviar los datos al servidor
+            $.ajax({
+                url: '{% url "editar_cita" %}',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(citaData),
+                success: function(response) {
+                    if (response.success) {
+                        $('#editCitaModal').modal('hide');
+                        calendar.refetchEvents();  // Actualizar el calendario
+                        toastr.success('Cita actualizada correctamente');
+                    } else {
+                        toastr.error('Error al actualizar la cita: ' + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    toastr.error('Error al actualizar la cita: ' + error);
+                }
+            });
+        });
+    }
+
+    function eliminarCita(event) {
+    var citaInfo = `
+        Fecha: ${event.start.toLocaleDateString()}
+        Hora: ${event.start.toLocaleTimeString()}
+        Cliente: ${event.extendedProps.cliente || 'No especificado'}
+        Servicio: ${event.extendedProps.servicio || 'No especificado'}
+    `;
+
+    if (confirm(`¿Está seguro que desea eliminar esta cita?\n\nDetalles de la cita:\n${citaInfo}`)) {
+        $.ajax({
+            url: '{% url "eliminar_cita" %}',
+            type: 'POST',
+            data: JSON.stringify({
+                id_cita: event.id
+            }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            success: function(response) {
+                if (response.success) {
+                    event.remove();
+                    toastr.success('Cita eliminada correctamente');
+                    console.log('Cita eliminada:', citaInfo);
+                    // Añadir esta línea para restablecer window.currentTooltip
+                    window.currentTooltip = null;
+                } else {
+                    toastr.error('Error al eliminar la cita: ' + (response.message || 'Error desconocido'));
+                    console.error('Detalles del error:', response);
+                    // Añadir esta línea para restablecer window.currentTooltip
+                    window.currentTooltip = null;
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error response:', xhr.responseText);
+                let errorMessage = 'Error al eliminar la cita';
+                try {
+                    let errorResponse = JSON.parse(xhr.responseText);
+                    errorMessage += ': ' + (errorResponse.message || errorResponse.error || error);
+                } catch (e) {
+                    errorMessage += ': ' + error;
+                }
+                toastr.error(errorMessage);
+                console.error('Detalles completos del error:', {xhr: xhr, status: status, error: error});
+            }
+        });
+    } else {
+        console.log('Eliminación de cita cancelada. Detalles de la cita:', citaInfo);
+    }
+}
+
+// Función auxiliar para obtener el token CSRF
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+});
+
+        function mostrarDatosCita(event) {
+            console.log('Mostrando datos de la cita:', event); // Para depuración
+    
+    // Llenar el formulario con los datos de la cita
+    $('#datosClient').val(event.extendedProps.cliente || 'No especificado');
+    $('#datosDate').val(event.start ? event.start.toISOString().split('T')[0] : 'Fecha no disponible');
+    $('#datosTime').val(event.start ? event.start.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : 'Hora no disponible');
+    $('#datosStatus').val(event.extendedProps.estado || 'No especificado');
+    
+    // Llenar la lista de servicios
+    var serviciosList = $('#datosServiceList');
+    serviciosList.empty();
+    if (event.extendedProps.servicios && event.extendedProps.servicios.length > 0) {
+        event.extendedProps.servicios.forEach(function(servicio) {
+            serviciosList.append(`<p>${servicio.descripcion || 'Servicio no especificado'} - ${servicio.empleado || 'Empleado no especificado'}</p>`);
+        });
+    } else {
+        serviciosList.append('<p>No hay servicios especificados</p>');
+    }
+    
+    $('#datosTotalDuration').val((event.extendedProps.duracion_total || 'No especificada') + ' minutos');
+    $('#datosTotalPrice').val((event.extendedProps.precio_total || 'No especificado') + ' Gs.');
+    // Actualizar el enlace de "Procesar Pago" con el ID de la cita
+    $('#procesarPago').attr('href', '{% url "menu_pago" %}?idcita=' + event.id);
+    // Actualizar el botón "Confirmar" con el ID de la cita
+    $('#confirmarCita').data('cita-id', event.id);
+    // Mostrar el panel
+    $('#datosPanel').addClass('open');
+    console.log('Panel de datos abierto'); // Para depuración
+}
+        // Manejar el cierre del panel
+        $('.close-panel').on('click', function() {
+            $(this).closest('.sliding-panel').removeClass('open');
+        });
+
+        // Manejar las acciones del menú desplegable
+        $('#eliminarCita').on('click', function(e) {
+            e.preventDefault();
+            if (confirm('¿Está seguro que desea eliminar esta cita?')) {
+                // Aquí iría el código para eliminar la cita
+                console.log('Cita eliminada');
+                $('#datosPanel').removeClass('open');
+                calendar.refetchEvents();
+            }
+        });
+
+        
+</script>
+
+<script src="{% static 'script.js' %}"></script>
 </body>
 </html>

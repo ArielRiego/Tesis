@@ -1,0 +1,66 @@
+<!-- agenda_semanal.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda Semanal</title>
+    <style>
+        
+        .agenda-container {
+            display: grid;
+            grid-template-columns: 100px repeat(7, 1fr);
+            gap: 1px;
+            background-color: #ddd;
+        }
+        .agenda-header, .agenda-time, .agenda-cell {
+            background-color: white;
+            padding: 5px;
+            text-align: center;
+        }
+        .agenda-header {
+            font-weight: bold;
+        }
+        .agenda-time {
+            font-weight: bold;
+            grid-column: 1;
+        }
+        .cita {
+            background-color: #00ff15;
+            color: white;
+            padding: 2px;
+            margin: 1px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Agenda Semanal</h1>
+    <div class="agenda-container">
+        <div class="agenda-header">Hora</div>
+        <div class="agenda-header">Lunes</div>
+        <div class="agenda-header">Martes</div>
+        <div class="agenda-header">Miércoles</div>
+        <div class="agenda-header">Jueves</div>
+        <div class="agenda-header">Viernes</div>
+        <div class="agenda-header">Sábado</div>
+        <div class="agenda-header">Domingo</div>
+        
+        {% for hora in horas %}
+            <div class="agenda-time">{{ hora }}</div>
+            {% for dia in dias_semana %}
+                <div class="agenda-cell">
+                    {% for cita in citas %}
+                        {% if cita.fecha == dia and cita.hora_inicio|time == hora %}
+                            <div class="cita">
+                                {{ cita.cliente.nombre }} - {{ cita.servicio.nombre }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+</body>
+</html>

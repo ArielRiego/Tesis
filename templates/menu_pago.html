@@ -1,0 +1,685 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    
+    <title>Pago - Salon de belleza</title>
+    <style>
+            /* Estilos generales */
+            body {
+                display: flex;
+                min-height: 100vh;
+                margin: 0;
+                font-family: Arial, sans-serif;
+            }
+        
+            /* General Styles */
+            a {
+                text-decoration: none;
+            }
+            
+            /* Estilos del sidebar */
+            #sidebar {
+                width: 260px;
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                background-color: #f8f9fa;
+                overflow-y: auto;
+                z-index: 1000;
+            }
+            
+            /* Estilos del contenido principal */
+            #content {
+                flex-grow: 1;
+                margin-left: 260px; /* Mismo ancho que el sidebar */
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+            }
+            
+            /* Estilos de la barra de navegación superior */
+            #content nav {
+                position: sticky;
+                top: 0;
+                z-index: 999;
+                background-color: #f8f9fa;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                padding: 1rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            /* Estilos para los iconos de la barra de navegación */
+            #content nav .nav-icons .nav-icon {
+                font-size: 1.5rem;
+                margin-left: 1rem;
+            }
+            
+            /* Estilos del contenido principal */
+            .main-content {
+                flex-grow: 1;
+                padding: 20px;
+                overflow-y: auto;
+            }
+            
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 15px;
+            }
+            
+            /* Estilos para el formulario de pago */
+            .payment-form {
+                background-color: white;
+                border-radius: 10px;
+                padding: 20px;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                margin-bottom: 20px;
+            }
+            
+            .payment-summary {
+                background-color: #fbd5e5;
+                border-radius: 10px;
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+
+            .payment-form h4 {
+                font-weight: bold;
+                font-size: 1.2rem;
+                margin-bottom: 1rem;
+            }
+
+            .payment-form .payment-summary {
+                background-color: #fbd5e5;
+                border-radius: 10px;
+                padding: 15px;
+            }
+
+            .payment-form #lista-servicios {
+                margin-top: 1rem;
+            }
+            
+            .btn-confirm {
+                background-color: #eb9ac0;
+                border: none;
+                width: 100%;
+                padding: 10px;
+                font-size: 18px;
+                font-weight: bold;
+                color: white;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+            
+            .btn-confirm:hover {
+                background-color: #e16a9e;
+            }
+            
+            .service-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 0;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .service-item:last-child {
+                border-bottom: none;
+            }
+            
+            .total-amount {
+                font-size: 24px;
+                font-weight: bold;
+                color: #eb9ac0;
+            }
+            
+            /* Estilos para centrar el título "Gestión de Pagos" */
+            .main-content .container h2 {
+                text-align: center;
+                width: 100%;
+                margin-bottom: 2rem;
+            }
+            
+            /* Estilos responsivos */
+            @media (max-width: 768px) {
+                #sidebar {
+                    width: 100%;
+                    height: auto;
+                    position: relative;
+                }
+            
+                #content {
+                    margin-left: 0;
+                }
+            
+                .container {
+                    padding: 0 10px;
+                }
+            }
+            
+            /* Estilos para el panel deslizante (si es necesario) */
+            .sliding-panel {
+                position: fixed;
+                top: 0;
+                right: -400px;
+                width: 400px;
+                height: 100vh;
+                background-color: #fff;
+                box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+                transition: right 0.3s ease-in-out;
+                z-index: 1001;
+                overflow-y: auto;
+            }
+            
+            .sliding-panel.open {
+                right: 0;
+            }
+            
+            .close-panel {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                font-size: 24px;
+                cursor: pointer;
+            }
+
+
+        </style>
+</head>
+<body>
+    <!-- Inicio Menu vertical-->
+    <section id="sidebar" id="sidebar" style="box-shadow: 2px 0 5px rgba(0,0,0,0.1);">
+        <a href="#" class="brand"><img src="{% static 'HairStudiodos.png' %}" alt="Salon Logo"></a>
+        <ul class="side-menu">
+            <li><a href="#" class="activo"><i class='bx bxs-dashboard icon'></i>Menu</a></li>
+            <li class="divider">Menu</li>
+            
+            <li>
+                <a href="#"><i class='bx bxs-book-heart icon'></i>Agenda<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'menu' %}"> > Citas Agendadas</a></li>
+                    <li><a href="{% url 'servicios_inmediatos' %}"> > Servicios Inmediatos</a></li>
+                </ul>
+            </li>
+           
+            <li>
+                <a href="#"><i class='bx bx-list-ul icon'></i>Servicios<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_servicios' %}"> > Lista de Servicios</a></li>
+                    <li><a href=""> > Historial de Servicios</a></li>
+                </ul>
+            </li>
+           
+            <li>
+                <a href="#"><i class='bx bxs-group icon'></i>Clientes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_clientes' %}"> > Lista de Cliente</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class='bx bx-money icon'></i>Pagos<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'menu_pago' %}"> > Gestión de Pagos</a></li>
+                    <li><a href=""> > Historial de Pagos</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class='bx bx-file icon'></i>Reportes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#"> > Ventas</a></li>
+                    <li><a href="#"> > Servicios Populares</a></li>
+                    <li><a href="#"> > Rendimiento de Empleados</a></li>
+                    <li><a href="#"> > Análisis de Citas vs. Servicios Inmediatos</a></li>
+                </ul>
+            </li>
+
+
+            {% if user.usuario_administrador %}
+            <li class="divider">Seccion Administrador</li> 
+            <li>
+                <a href="#"><i class='bx bxs-cog icon'></i>Configuración<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#">Servicio</a></li>
+                    <li><a href="#">Empleado</a></li>
+                    <li><a href="#">Roles</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class='bx bx-id-card icon'></i>Empleados<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_empleados' %}"> > Lista de Empleados</a></li>
+                    <li><a href=""> > Gestión de Horarios</a></li>
+                </ul>
+            </li>
+            {% endif %}
+            
+        </ul>
+
+        <div class="ads">
+            <div class="wrapper">
+                <a href="{% url 'logout' %}" class="btn-upgrade">Cerrar Sesión</a>
+            </div>
+        </div>
+    </section>
+    <!-- Fin Menu vertical -->
+
+   <!-- Inicio Menu Horizontal -->
+   <section id="content"> 
+        <nav>
+            <div class="">
+                    
+            </div>
+            <div class="nav-icons">
+                <i class='bx bxs-bell nav-icon'></i>
+                <i class='bx bxs-user-circle nav-icon'></i>
+            </div>
+        </nav>
+
+
+        <div class="main-content">
+            <div class="container mt-4">
+                <h2 class="mb-4">Gestión de Pagos</h2>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="payment-form">
+                            <div class="mb-3">
+                                <h4>Seleccionar Cita</h4>
+                                <select class="form-select" id="seleccion-cita">
+                                    <option value="">Seleccione una cita o ingrese datos manualmente</option>
+                                    <!-- Las opciones se cargarán dinámicamente -->
+                                </select>
+                            </div>
+                            <h4>Detalles de la Cita</h4>
+                            <div class="payment-summary">
+                                <p><strong>Fecha:</strong> <span id="cita-fecha"></span></p>
+                                <p><strong>Hora:</strong> <span id="cita-hora"></span></p>
+                                <p><strong>Duración:</strong> <span id="cita-duracion"></span></p>
+                                <p><strong>Cliente:</strong> <span id="cita-cliente"></span></p>
+                                <h4 style="text-align: center;">Servicios</h4>
+                                <div id="lista-servicios" class="mb-3">
+                                    <!-- Los servicios se agregarán dinámicamente aquí -->
+                                </div>
+                            </div>
+                           
+                            <div class="mb-3">
+                                <label for="descuento" class="form-label">Descuento (Gs.)</label>
+                                <input type="number" class="form-control" id="descuento" value="0">
+                            </div>
+                            <div class="mb-3">
+                                <label for="metodo-pago" class="form-label">Método de Pago</label>
+                                <select class="form-select" id="metodo-pago">
+                                    <option value="">Seleccione un método de pago</option>
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="tarjeta">Tarjeta de Crédito/Débito</option>
+                                    <option value="transferencia">Transferencia Bancaria</option>
+                                </select>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="emitir-comprobante" checked>
+                                <label class="form-check-label" for="emitir-comprobante">
+                                    Emitir comprobante
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-form">
+                            <h4 style="text-align: center;">Resumen de Pago</h4>
+                            <p><strong>Subtotal:</strong> <span id="subtotal"></span> Gs.</p>
+                            <p><strong>Descuento:</strong> <span id="descuento-aplicado"></span> Gs.</p>
+                            <p class="total-amount"><strong>Total:</strong> <span id="total"></span> Gs.</p>
+                            <div class="mb-3">
+                                <label for="monto-recibido" class="form-label">Monto recibido:</label>
+                                <input type="number" class="form-control" id="monto-recibido" placeholder="Ingrese el monto recibido">
+                            </div>
+                            <p><strong>Cambio:</strong> <span id="cambio">0</span> Gs.</p>
+                            
+                            <button id="btn-confirmar" class="btn btn-confirm">Confirmar Pago</button>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let citaActual = null;
+    
+        function formatearFecha(fecha) {
+            if (!fecha) return '';
+            const [year, month, day] = fecha.split('-');
+            return `${day}-${month}-${year}`;
+        }
+
+        function cargarCitasPendientes() {
+            console.log('Cargando citas pendientes...');
+            fetch('/pagos/citas-pendientes/')
+                .then(response => {
+                    console.log('Respuesta de citas pendientes:', response);
+                    if (!response.ok) {
+                        throw new Error('Error en la respuesta del servidor');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Citas pendientes recibidas:', data);
+                    const select = document.getElementById('seleccion-cita');
+                    select.innerHTML = '<option value="">Seleccione una cita o ingrese datos manualmente</option>';
+                    if (data.length === 0) {
+                        toastr.info('No hay citas pendientes en este momento.');
+                        return;
+                    }
+                    data.forEach(cita => {
+                        const option = document.createElement('option');
+                        option.value = cita.idcita;
+                        option.textContent = `${formatearFecha(cita.fecha)} - ${formatearCliente(cita.cliente)} - ${formatearServicios(cita.servicios)}`;
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error al cargar citas pendientes:', error);
+                    toastr.error('Error al cargar las citas pendientes: ' + error.message);
+                });
+        }
+    
+        function obtenerDatosCita(idcita) {
+            console.log('Obteniendo datos para la cita:', idcita);
+            fetch(`/pagos/obtener-datos-cita/${idcita}/`)
+                .then(response => {
+                    console.log('Respuesta recibida:', response);
+                    if (!response.ok) {
+                        throw new Error('La respuesta del servidor no fue satisfactoria');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Datos de la cita recibidos:', data);
+                    if (!data) {
+                        throw new Error('No se recibieron datos de la cita');
+                    }
+                    citaActual = data;
+                    cargarDatosCita(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    toastr.error('Error al cargar los datos de la cita: ' + error.message);
+                });
+        }
+    
+
+
+        function formatearCliente(cliente) {
+            if (typeof cliente === 'string') return cliente;
+            if (cliente && typeof cliente === 'object') {
+                return `${cliente.nombre || ''} ${cliente.apellido || ''}`.trim() || 'Cliente no especificado';
+            }
+            return 'Cliente no especificado';
+        }
+
+        function formatearServicios(servicios) {
+            if (!servicios || !Array.isArray(servicios) || servicios.length === 0) return 'Sin servicios';
+            return servicios.map(s => {
+                if (typeof s === 'string') {
+                    try {
+                        const servicio = JSON.parse(s);
+                        return servicio.descripcion || 'Servicio sin nombre';
+                    } catch (error) {
+                        console.error('Error al parsear servicio:', error);
+                        return 'Servicio sin nombre';
+                    }
+                } else if (typeof s === 'object' && s !== null) {
+                    return s.descripcion || 'Servicio sin nombre';
+                } else {
+                    return 'Servicio sin nombre';
+                }
+            }).join(', ');
+        }
+
+        function cargarDatosCita(cita) {
+            if (!cita) {
+                console.error('No se recibieron datos de la cita');
+                toastr.error('Error: No se recibieron datos de la cita');
+                return;
+            }
+
+            document.getElementById('cita-fecha').textContent = formatearFecha(cita.fecha) || 'No especificada';
+            document.getElementById('cita-hora').textContent = cita.hora_inicio || 'No especificada';
+            document.getElementById('cita-duracion').textContent = calcularDuracionTotal(cita.servicios);
+            document.getElementById('cita-cliente').textContent = formatearCliente(cita.cliente);
+
+    
+            const listaServicios = document.getElementById('lista-servicios');
+            listaServicios.innerHTML = '';
+            let subtotal = 0;
+    
+            if (cita.servicios && Array.isArray(cita.servicios) && cita.servicios.length > 0) {
+                cita.servicios.forEach(servicio => {
+                    let servicioObj;
+                    if (typeof servicio === 'string') {
+                        try {
+                            servicioObj = JSON.parse(servicio);
+                        } catch (error) {
+                            console.error('Error al parsear servicio:', error);
+                            servicioObj = { descripcion: 'Servicio sin nombre', costo: 0 };
+                        }
+                    } else if (typeof servicio === 'object' && servicio !== null) {
+                        servicioObj = servicio;
+                    } else {
+                        servicioObj = { descripcion: 'Servicio sin nombre', costo: 0 };
+                    }
+
+                    const servicioDiv = document.createElement('div');
+                    servicioDiv.className = 'service-item';
+                    servicioDiv.innerHTML = `
+                        <span>${servicioObj.descripcion || 'Servicio sin nombre'}</span>
+                        <span>${formatearPrecio(servicioObj.costo)}</span>
+                    `;
+                    listaServicios.appendChild(servicioDiv);
+                    subtotal += parseFloat(servicioObj.costo) || 0;
+                });
+            } else {
+                listaServicios.innerHTML = '<p>No hay servicios asociados a esta cita.</p>';
+            }
+    
+            document.getElementById('subtotal').textContent = formatearPrecio(subtotal);
+            actualizarTotal();
+        }
+
+        function calcularDuracionTotal(servicios) {
+            if (!servicios || !Array.isArray(servicios) || servicios.length === 0) return 'Duración no especificada';
+            let duracionTotal = 0;
+            servicios.forEach(servicioString => {
+                try {
+                    const servicio = JSON.parse(servicioString);
+                    duracionTotal += parseInt(servicio.duracion) || 0;
+                } catch (error) {
+                    console.error('Error al parsear servicio para duración:', error);
+                }
+            });
+            return duracionTotal > 0 ? `${duracionTotal} minutos` : 'Duración no especificada';
+        }
+
+        function formatearPrecio(precio) {
+            const precioNumerico = parseFloat(precio);
+            if (isNaN(precioNumerico)) {
+                return '0 Gs.';
+            }
+            return new Intl.NumberFormat('es-PY', { 
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(precioNumerico);
+        }
+    
+        function actualizarTotal() {
+
+            const subtotal = parseFloat(document.getElementById('subtotal').textContent.replace(/\D/g, '')) || 0;
+            const descuento = parseFloat(document.getElementById('descuento').value) || 0;
+            const total = Math.max(subtotal - descuento, 0);
+
+            document.getElementById('descuento-aplicado').textContent = formatearPrecio(descuento);
+            document.getElementById('total').textContent = formatearPrecio(total);
+            calcularCambio(); // Llamar a calcularCambio aquí para actualizar el cambio cuando cambie el total
+        }
+    
+        // Agregar esto después de la función actualizarTotal()
+
+        function calcularCambio() {
+            const total = parseFloat(document.getElementById('total').textContent.replace(/\D/g, '')) || 0;
+            const montoRecibido = parseFloat(document.getElementById('monto-recibido').value) || 0;
+            const cambio = Math.max(montoRecibido - total, 0);
+            document.getElementById('cambio').textContent = formatearPrecio(cambio);
+        }
+
+        document.getElementById('monto-recibido').addEventListener('input', calcularCambio);
+
+
+        document.getElementById('seleccion-cita').addEventListener('change', function() {
+            const idcita = this.value;
+            if (idcita) {
+                obtenerDatosCita(idcita);
+            } else {
+                limpiarFormulario();
+            }
+        });
+    
+        document.getElementById('descuento').addEventListener('input', actualizarTotal);
+    
+        document.getElementById('btn-confirmar').addEventListener('click', function() {
+            const metodoPago = document.getElementById('metodo-pago').value;
+            if (!metodoPago) {
+                toastr.error('Por favor, seleccione un método de pago.');
+                return;
+            }
+    
+            if (!citaActual) {
+                toastr.error('Por favor, seleccione una cita antes de confirmar el pago.');
+                return;
+            }
+    
+            const montoRecibido = parseFloat(document.getElementById('monto-recibido').value) || 0;
+            const total = parseFloat(document.getElementById('total').textContent.replace(/\D/g, '')) || 0;
+
+            if (montoRecibido < total) {
+                toastr.error('El monto recibido es menor que el total a pagar.');
+                return;
+            }
+
+            const data = {
+                idcita: citaActual.idcita,
+                monto: total,
+                monto_recibido: montoRecibido,
+                metodo_pago: metodoPago,
+                descuento: parseFloat(document.getElementById('descuento').value) || 0
+            };
+    
+            console.log('Datos enviados al servidor:', data);
+    
+            fetch('/pagos/procesar/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error('La respuesta del servidor no fue satisfactoria: ' + text);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    toastr.success(data.mensaje);
+                    if (document.getElementById('emitir-comprobante').checked) {
+                        console.log('Generando comprobante...');
+                        // Aquí iría la lógica para generar y mostrar el comprobante
+                    }
+                    limpiarFormulario();
+                    cargarCitasPendientes();
+                } else {
+                    toastr.error(data.mensaje);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                toastr.error('Error al procesar el pago: ' + error.message);
+            });
+        });
+    
+        function limpiarFormulario() {
+            document.getElementById('cita-fecha').textContent = '';
+            document.getElementById('cita-hora').textContent = '';
+            document.getElementById('cita-duracion').textContent = '';
+            document.getElementById('cita-cliente').textContent = '';
+            document.getElementById('lista-servicios').innerHTML = '';
+            document.getElementById('subtotal').textContent = '0 Gs.';
+            document.getElementById('descuento').value = '0';
+            document.getElementById('metodo-pago').value = '';
+            citaActual = null;
+            actualizarTotal();
+        }
+    
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    
+        // Configuración de toastr
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "timeOut": "5000"
+        };
+    
+        // Cargar citas pendientes al iniciar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM completamente cargado y analizado');
+            cargarCitasPendientes();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const idcita = urlParams.get('idcita');
+            if (idcita) {
+                console.log('ID de cita encontrado en URL:', idcita);
+                obtenerDatosCita(idcita);
+            }
+        });
+    </script>
+    <!-- Cargar el archivo de scripts JS -->
+    <script src="{% static 'script.js' %}"></script>
+</body>
+</html>

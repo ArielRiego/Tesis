@@ -1,0 +1,447 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <title>Salon de belleza - Servicios Inmediatos</title>
+    <style>
+        .service-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        .service-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .service-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .service-info {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .service-price {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .service-duration {
+            font-size: 0.9em;
+            color: #007bff;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .overlay-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .selected-services {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .selected-service-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 5px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Inicio Menu vertical-->
+    <section id="sidebar">
+        <a href="#" class="brand"><img src="{% static 'HairStudiodos.png' %}" alt="Salon Logo"></a>
+        <ul class="side-menu">
+            <li><a href="{% url 'menu' %}" class="activo"><i class='bx bxs-dashboard icon'></i>Menu</a></li>
+            <li class="divider">Principal</li>
+            <li><a href="#"><i class='bx bxs-calendar icon'></i>Calendario</a></li>
+            <li><a href="{% url 'listar_servicios' %}"><i class='bx bxs-widget icon'></i>Servicios</a></li>
+            <li><a href="{% url 'servicios_inmediatos' %}"><i class='bx bxs-widget icon'></i>Servicios Inmediatos</a></li>
+            <li><a href="{% url 'listar_clientes' %}"><i class='bx bxs-user-pin icon'></i>Cliente</a></li>
+            <li><a href="{% url 'menu_pago' %}"><i class='bx bxs-user-pin icon'></i>Gestión de Pagos</a></li>
+            <li>
+                <a href="#"><i class='bx bxs-book-content icon'></i>Reporte<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#">Operativo</a></li>
+                    <li><a href="#">Gerencial</a></li>
+                </ul>
+            </li>
+            {% if user.usuario_administrador %}
+            <li class="divider">Seccion Administrador</li>
+            <li>
+                <a href="#"><i class='bx bxs-notepad icon'></i>Ajustes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#">Servicio</a></li>
+                    <li><a href="#">Empleado</a></li>
+                    <li><a href="#">Roles</a></li>
+                </ul>
+            </li>
+            {% endif %}
+        </ul>
+
+        <div class="ads">
+            <div class="wrapper">
+                <a href="{% url 'logout' %}" class="btn-upgrade">Cerrar Sesion</a>
+            </div>
+        </div>
+    </section>
+    <!-- Fin Menu vertical -->
+
+    <!-- Inicio Menu Horizontal y Contenido -->
+    <section id="content"> 
+        <nav>
+            <i class='bx bx-menu toggle-sidebar'></i>
+            <a href="#" class="nav-link">
+                <i class='bx bxs-bell icon'></i>
+                <span class="badge"></span>
+            </a>
+            
+            <div class="profile">
+                <ul class="profile-link">
+                    <li><a href="#"><i class='bx bxs-user-circle icon'></i></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Contenido de Servicios Inmediatos -->
+        <main class="services-content">
+            <h1 class="text-center mb-4">Servicios Inmediatos</h1>
+            
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-8 offset-md-2">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Datos del Servicio Inmediato</h5>
+                                <form id="immediateServiceForm">
+                                    <div class="mb-3">
+                                        <label for="client" class="form-label">Cliente</label>
+                                        <select class="form-select" id="client" required>
+                                            <option value="">Seleccione un cliente</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Servicios Seleccionados</label>
+                                        <div id="selectedServices" class="selected-services">
+                                            <!-- Los servicios seleccionados se mostrarán aquí -->
+                                        </div>
+                                    </div>
+                                    <button type="button" id="addServiceBtn" class="btn btn-primary">Añadir Servicios</button>
+                                    <button type="submit" class="btn btn-success mt-3">Confirmar Servicio Inmediato</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+    <!-- Fin Menu Horizontal y Contenido -->
+
+    <!-- Overlay para selección de servicios -->
+    <div id="serviceOverlay" class="overlay">
+        <div class="overlay-content">
+            <h2>Seleccionar Servicio</h2>
+            <div id="servicesList" class="row">
+                <!-- Los servicios se cargarán aquí dinámicamente -->
+            </div>
+            <button id="closeOverlay" class="btn btn-secondary mt-3">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- Overlay para selección de empleados -->
+    <div id="employeeOverlay" class="overlay">
+        <div class="overlay-content">
+            <h2>Seleccionar Empleado</h2>
+            <div id="employeesList" class="row">
+                <!-- Los empleados se cargarán aquí dinámicamente -->
+            </div>
+            <button id="closeEmployeeOverlay" class="btn btn-secondary mt-3">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let selectedServices = [];
+            let currentServiceIndex = null;
+
+            function cargarClientes() {
+                $.ajax({
+                    url: '{% url "obtener_clientes" %}',
+                    method: 'GET',
+                    success: function(data) {
+                        var select = $('#client');
+                        select.empty().append('<option value="">Seleccione un cliente</option>');
+                        $.each(data.clientes, function(index, cliente) {
+                            select.append($('<option></option>')
+                                .attr('value', cliente.cedula)
+                                .text(cliente.nombre + ' ' + cliente.apellido));
+                        });
+                        select.select2({
+                            placeholder: 'Buscar cliente...',
+                            allowClear: true
+                        });
+                    },
+                    error: function(error) {
+                        console.error("Error al cargar clientes:", error);
+                        toastr.error('Error al cargar clientes. Por favor, intente de nuevo.');
+                    }
+                });
+            }
+
+            function cargarServicios() {
+                $.ajax({
+                    url: '{% url "obtener_servicios" %}',
+                    method: 'GET',
+                    success: function(data) {
+                        var servicesList = $('#servicesList');
+                        servicesList.empty();
+                        $.each(data.servicios, function(index, servicio) {
+                            var serviceCard = `
+                                <div class="col-md-4 mb-3">
+                                    <div class="service-card">
+                                        <div class="service-title">${servicio.descripcion}</div>
+                                        <div class="service-info">
+                                            <span class="service-price">${servicio.costo} Gs.</span>
+                                            <span class="service-duration">${servicio.duracion} min</span>
+                                        </div>
+                                        <button class="btn btn-primary mt-2 select-service" 
+                                            data-id="${servicio.idservicio}" 
+                                            data-descripcion="${servicio.descripcion}" 
+                                            data-costo="${servicio.costo}" 
+                                            data-duracion="${servicio.duracion}">
+                                            Seleccionar
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                            servicesList.append(serviceCard);
+                        });
+                    },
+                    error: function(error) {
+                        console.error("Error al cargar servicios:", error);
+                        toastr.error('Error al cargar servicios. Por favor, intente de nuevo.');
+                    }
+                });
+            }
+
+            function cargarEmpleados(serviceId) {
+                $.ajax({
+                    url: '{% url "obtener_empleados" %}',
+                    method: 'GET',
+                    success: function(data) {
+                        var employeesList = $('#employeesList');
+                        employeesList.empty();
+                        $.each(data.empleados, function(index, empleado) {
+                            var employeeCard = `
+                                <div class="col-md-4 mb-3">
+                                    <div class="service-card">
+                                        <div class="service-title">${empleado.nombre} ${empleado.apellido}</div>
+                                        <button class="btn btn-primary mt-2 select-employee" 
+                                            data-id="${empleado.idtipousuario}" 
+                                            data-nombre="${empleado.nombre} ${empleado.apellido}"
+                                            data-service-id="${serviceId}">
+                                            Seleccionar
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                            employeesList.append(employeeCard);
+                        });
+                    },
+                    error: function(error) {
+                        console.error("Error al cargar empleados:", error);
+                        toastr.error('Error al cargar empleados. Por favor, intente de nuevo.');
+                    }
+                });
+            }
+
+            cargarClientes();
+
+            $('#addServiceBtn').click(function() {
+                cargarServicios();
+                $('#serviceOverlay').css('display', 'flex');
+            });
+
+            $('.close-panel, #closeOverlay, #closeEmployeeOverlay').click(function() {
+                $('.overlay').hide();
+            });
+
+            $(document).on('click', '.select-service', function() {
+                var serviceId = $(this).data('id');
+                var serviceDescripcion = $(this).data('descripcion');
+                var serviceCosto = $(this).data('costo');
+                var serviceDuracion = $(this).data('duracion');
+                
+                $('#serviceOverlay').hide();
+                cargarEmpleados(serviceId);
+                $('#employeeOverlay').css('display', 'flex');
+
+                currentServiceIndex = selectedServices.length;
+                selectedServices.push({
+                    idservicio: serviceId,
+                    descripcion: serviceDescripcion,
+                    costo: serviceCosto,
+                    duracion: serviceDuracion,
+                    idtipo_usuario: null,
+                    employeeName: null
+                });
+            });
+
+            $(document).on('click', '.select-employee', function() {
+                var employeeId = $(this).data('id');
+                var employeeName = $(this).data('nombre');
+                var serviceId = $(this).data('service-id');
+
+                if (currentServiceIndex !== null && currentServiceIndex < selectedServices.length) {
+                    selectedServices[currentServiceIndex].idtipo_usuario = employeeId;
+                    selectedServices[currentServiceIndex].employeeName = employeeName;
+                    updateSelectedServicesList();
+                }
+
+                $('#employeeOverlay').hide();
+                currentServiceIndex = null;
+            });
+
+            function updateSelectedServicesList() {
+                var selectedServicesContainer = $('#selectedServices');
+                selectedServicesContainer.empty();
+
+                selectedServices.forEach(function(service, index) {
+                    var employeeInfo = service.employeeName ? `- ${service.employeeName}` : '- <span class="text-danger">Sin empleado asignado</span>';
+                    var serviceItem = `
+                        <div class="selected-service-item">
+                            <span>${service.descripcion} ${employeeInfo}</span>
+                            <span>${service.costo} Gs. (${service.duracion} min)</span>
+                            <button class="btn btn-sm btn-warning edit-service" data-index="${index}">Editar</button>
+                            <button class="btn btn-sm btn-danger remove-service" data-index="${index}">Eliminar</button>
+                        </div>
+                    `;
+                    selectedServicesContainer.append(serviceItem);
+                });
+            }
+
+            $(document).on('click', '.edit-service', function() {
+                var index = $(this).data('index');
+                currentServiceIndex = index;
+                var serviceId = selectedServices[index].idservicio;
+                cargarEmpleados(serviceId);
+                $('#employeeOverlay').css('display', 'flex');
+            });
+
+            $(document).on('click', '.remove-service', function() {
+                var index = $(this).data('index');
+                selectedServices.splice(index, 1);
+                updateSelectedServicesList();
+            });
+
+            $('#immediateServiceForm').submit(function(e) {
+                e.preventDefault();
+                var clientId = $('#client').val();
+                if (clientId && selectedServices.length > 0) {
+                    var validServices = selectedServices.filter(function(service) {
+                        return service.idservicio && service.idtipo_usuario;
+                    });
+
+                    if (validServices.length === 0) {
+                        toastr.error('Por favor, seleccione al menos un servicio completo con empleado asignado.');
+                        return;
+                    }
+
+                    var formData = {
+                        idcliente: clientId,
+                        servicios: validServices.map(function(service) {
+                            return {
+                                idservicio: service.idservicio,
+                                idtipo_usuario: service.idtipo_usuario,
+                                duracion: service.duracion,
+                                costo: service.costo
+                            };
+                        })
+                    };
+                    
+                    console.log('Datos a enviar:', formData);
+
+                    $.ajax({
+                        url: '{% url "agregar_servicio_inmediato" %}',
+                        method: 'POST',
+                        data: JSON.stringify(formData),
+                        contentType: 'application/json',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                toastr.success('Servicio inmediato registrado con éxito');
+                                $('#immediateServiceForm')[0].reset();
+                                $('#client').val('').trigger('change');
+                                selectedServices = [];
+                                updateSelectedServicesList();
+                            } else {
+                                toastr.error('Error al registrar el servicio inmediato: ' + response.error);
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.error('Error:', textStatus, errorThrown);
+                            toastr.error('Error al procesar la solicitud: ' + errorThrown);
+                        }
+                    });
+                } else {
+                    toastr.error('Por favor, seleccione un cliente y al menos un servicio.');
+                }
+            });
+
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "5000"
+            };
+        });
+    </script>
+
+    <script src="{% static 'script.js' %}"></script>
+</body>
+</html>

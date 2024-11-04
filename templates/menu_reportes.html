@@ -1,0 +1,312 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-uac-compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Cargar los íconos desde CDN -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+    <!-- Vincular el archivo de estilos CSS -->
+    <link rel="stylesheet" href="{% static 'style_reporte.css' %}">
+    <!-- Agregar estilos de Toastr para los mensajes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <title>Salon de belleza - Clientes</title>
+    <style>
+        /* Menú Horizontal (Barra de navegación superior) */
+        #content nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+      
+       
+        /* Estilo para los enlaces dentro de la celda de Acciones */
+        #clientes-table td:last-child a {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 30px; /* Ajusta según el tamaño que desees */
+            height: 30px; /* Ajusta según el tamaño que desees */
+            margin: 0 2px; /* Espacio entre los iconos */
+        }
+        .nav-icons {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            color: #000;
+            margin-left: 1rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .nav-icon:hover {
+            color: #555;
+        }
+
+        /* Menú Vertical (Panel deslizante) */
+        .sliding-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background-color: #fff;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            transition: right 0.3s ease-in-out;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sliding-panel.open {
+            right: 0;
+        }
+
+        .close-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Estilos comunes para elementos de menú */
+        a {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Inicio Menu vertical-->
+    <section id="sidebar" id="sidebar" style="box-shadow: 2px 0 5px rgba(0,0,0,0.1);">
+        <a href="#" class="brand"><img src="{% static 'HairStudiodos.png' %}" alt="Salon Logo"></a>
+        <ul class="side-menu">
+            <li><a href="#" class="activo"><i class='bx bxs-dashboard icon'></i>Menu</a></li>
+            <li class="divider">Menu</li>
+            
+            <li>
+                <a href="#"><i class='bx bxs-book-heart icon'></i>Agenda<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'menu' %}"> > Citas Agendadas</a></li>
+                    <li><a href="{% url 'servicios_inmediatos' %}"> > Servicios Inmediatos</a></li>
+                </ul>
+            </li>
+           
+            <li>
+                <a href="#"><i class='bx bx-list-ul icon'></i>Servicios<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_servicios' %}"> > Lista de Servicios</a></li>
+                    <li><a href=""> > Historial de Servicios</a></li>
+                </ul>
+            </li>
+           
+            <li>
+                <a href="#"><i class='bx bxs-group icon'></i>Clientes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_clientes' %}"> > Lista de Cliente</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class='bx bx-money icon'></i>Pagos<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'menu_pago' %}"> > Gestión de Pagos</a></li>
+                    <li><a href=""> > Historial de Pagos</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class='bx bx-file icon'></i>Reportes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#"> > Ventas</a></li>
+                    <li><a href="#"> > Servicios Populares</a></li>
+                    <li><a href="#"> > Rendimiento de Empleados</a></li>
+                    <li><a href="#"> > Análisis de Citas vs. Servicios Inmediatos</a></li>
+                </ul>
+            </li>
+
+
+            {% if user.usuario_administrador %}
+            <li class="divider">Seccion Administrador</li> 
+            <li>
+                <a href="#"><i class='bx bxs-cog icon'></i>Configuración<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#">Servicio</a></li>
+                    <li><a href="#">Empleado</a></li>
+                    <li><a href="#">Roles</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class='bx bx-id-card icon'></i>Empleados<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_empleados' %}"> > Lista de Empleados</a></li>
+                    <li><a href=""> > Gestión de Horarios</a></li>
+                </ul>
+            </li>
+            {% endif %}
+            
+        </ul>
+
+        <div class="ads">
+            <div class="wrapper">
+                <a href="{% url 'logout' %}" class="btn-upgrade">Cerrar Sesión</a>
+            </div>
+        </div>
+    </section>
+    <!-- Fin Menu vertical -->
+
+     <!-- Inicio Menu Horizontal y Contenido -->
+     <section id="content"> 
+        <nav>
+            <div class="nav-icons">
+                <i class='bx bxs-bell nav-icon'></i>
+                <i class='bx bxs-user-circle nav-icon'></i>
+            </div>
+        </nav>
+
+        <!-- Contenido principal -->
+        <div class="chart-container">
+            <h2 class="table-title">Servicios Populares (Últimos 30 días)</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <canvas id="serviciosCitasChart"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <canvas id="serviciosIngresosChart"></canvas>
+                </div>
+            </div>
+            <p>Última actualización: {{ ultima_actualizacion|date:"d/m/Y H:i" }}</p>
+        </div>
+   </section>
+   <!-- Fin Menu Horizontal -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        
+        $(document).ready(function() {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "preventDuplicates": true,
+                "newestOnTop": false,
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+            
+            {% if messages %}
+                {% for message in messages %}
+                    toastr.{{ message.tags }}('{{ message|escapejs }}');
+                {% endfor %}
+            {% endif %}
+
+            // Función para realizar la búsqueda en tiempo real
+            function performSearch() {
+                var query = $('input[name="q"]').val().toLowerCase();
+                $('#clientes-table tbody tr').each(function() {
+                    var row = $(this);
+                    var text = row.text().toLowerCase();
+                    if(text.indexOf(query) === -1) {
+                        row.hide();
+                    } else {
+                        row.show();
+                    }
+                });
+            }
+
+            // Evento de entrada en el campo de búsqueda
+            $('input[name="q"]').on('input', function() {
+                performSearch();
+            });
+
+            // Envío del formulario para búsqueda del lado del servidor
+            $('#search-form').on('submit', function(e) {
+                e.preventDefault();
+                var query = $('input[name="q"]').val();
+                window.location.href = "{% url 'listar_clientes' %}?q=" + encodeURIComponent(query);
+            });
+
+            // Realizar búsqueda inicial si hay una consulta
+            if($('input[name="q"]').val()) {
+                performSearch();
+            }
+        });
+    </script>
+    <!-- Cargar el archivo de scripts JS -->
+    <script src="{% static 'script.js' %}"></script>
+    <!-- Agregar estos scripts al final del body -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var labels = {{ labels|safe }};
+            var dataCitas = {{ data_citas|safe }};
+            var dataIngresos = {{ data_ingresos|safe }};
+        
+            function createChart(ctx, label, data, yAxisLabel) {
+                return new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: label,
+                            data: data,
+                            backgroundColor: 'rgba(235, 154, 192, 0.6)',
+                            borderColor: 'rgba(235, 154, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: yAxisLabel
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: label,
+                                font: {
+                                    size: 16
+                                }
+                            },
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+        
+            var ctxCitas = document.getElementById('serviciosCitasChart').getContext('2d');
+            var ctxIngresos = document.getElementById('serviciosIngresosChart').getContext('2d');
+        
+            createChart(ctxCitas, 'Cantidad de Citas por Servicio', dataCitas, 'Número de Citas');
+            createChart(ctxIngresos, 'Ingresos Totales por Servicio', dataIngresos, 'Ingresos (en tu moneda local)');
+        });
+        </script>
+    <script src="{% static 'script.js' %}"></script>
+</body>
+</html>
