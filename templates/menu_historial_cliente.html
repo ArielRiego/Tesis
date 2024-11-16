@@ -1,0 +1,1008 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-uac-compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Cargar los íconos desde CDN -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+    <!-- Vincular el archivo de estilos CSS -->
+    <link rel="stylesheet" href="{% static 'style_cliente.css' %}">
+    <!-- Agregar estilos de Toastr para los mensajes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <title>Salon de belleza - Clientes</title>
+    <style>
+        /* Menú Horizontal (Barra de navegación superior) */
+        #content nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+      
+       
+        /* Estilo para los enlaces dentro de la celda de Acciones */
+        #clientes-table td:last-child a {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 30px; /* Ajusta según el tamaño que desees */
+            height: 30px; /* Ajusta según el tamaño que desees */
+            margin: 0 2px; /* Espacio entre los iconos */
+        }
+        .nav-icons {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            color: #000;
+            margin-left: 1rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .nav-icon:hover {
+            color: #555;
+        }
+
+        /* Menú Vertical (Panel deslizante) */
+        .sliding-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background-color: #fff;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            transition: right 0.3s ease-in-out;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sliding-panel.open {
+            right: 0;
+        }
+
+        .close-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Estilos comunes para elementos de menú */
+        a {
+            text-decoration: none;
+        }
+        /* Estilos adicionales para el filtro de estado */
+        .filter-dropdown {
+            margin-left: 10px;
+        }
+        
+        /* Estilos para la tabla de historial */
+        #historial-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        #historial-table th, #historial-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #historial-table th {
+            background-color: #fbd5e5;
+            color: #333;
+        }
+
+        #historial-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        #historial-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* Estilos para filtros y búsqueda */
+        .search-and-filter {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .left-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 4px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            margin-right: 15px;
+        }
+
+        .back-button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .back-button i {
+            margin-right: 5px;
+        }
+
+        .table-title {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .search-form {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-form input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .search-form button {
+            background-color: #fbd5e5;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+
+        .filters-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .filter-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .filter-dropdown, .filter-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            font-size: 14px;
+            min-width: 150px;
+        }
+
+        /* Estilos para el botón Ver detalles */
+        .ver-detalles {
+            background-color: #fbd5e5;
+            border: none;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .ver-detalles:hover {
+            background-color: #f8c1d8;
+        }
+
+
+        /* Estilos para el modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .modal-table th, .modal-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .modal-table th {
+            background-color: #f2f2f2;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .top-row, .filters-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-form, .filter-container {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .table-title {
+                text-align: center;
+                margin-bottom: 10px;
+            }
+        }
+
+        /* Estilos para la tabla de historial */
+        /* Estilos para la tabla de historial */
+        #historial-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        #historial-table th, #historial-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #historial-table th {
+            background-color: #fbd5e5;
+            color: #333;
+        }
+
+        #historial-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        #historial-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* Estilos para filtros y búsqueda */
+        .search-and-filter {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .left-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 4px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            margin-right: 15px;
+        }
+
+        .back-button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .back-button i {
+            margin-right: 5px;
+        }
+
+        .table-title {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .search-form {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-form input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .search-form button {
+            background-color: #fbd5e5;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+
+        .filters-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .filter-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .filter-dropdown, .filter-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            font-size: 14px;
+            min-width: 150px;
+        }
+
+        /* Estilos para el botón Ver detalles */
+        .ver-detalles {
+            background-color: #fbd5e5;
+            border: none;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .ver-detalles:hover {
+            background-color: #f8c1d8;
+        }
+
+
+    /* Estilos para el modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: flex-start;
+        padding-top: 5vh;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 900px;
+        max-height: 85vh;
+        position: relative;
+        margin: 20px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-header {
+        background-color: #fbd5e5;
+        margin: -20px -20px 20px -20px;
+        padding: 15px 20px;
+        border-radius: 8px 8px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #333;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        transition: background-color 0.3s ease;
+    }
+
+    .modal-close:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-body {
+        overflow-y: auto;
+        flex-grow: 1;
+    }
+
+    .modal-table {
+        width: 100%;
+        margin: 0;
+        border-collapse: collapse;
+    }
+
+    .modal-table th,
+    .modal-table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .modal-table th {
+        background-color: #fbd5e5;
+        position: sticky;
+        top: 0;
+    }
+
+    .error-message {
+        color: #721c24;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        padding: 10px;
+        border-radius: 4px;
+        margin: 10px 0;
+        text-align: center;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .search-and-filter {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-form, .filter-container {
+            width: 100%;
+            margin-right: 0;
+        }
+
+        .table-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .table-header h2 {
+            margin-left: 0;
+            margin-top: 10px;
+        }
+    }
+            /* Estilos para el botón Aplicar Fechas */
+            .filter-button {
+            background-color: #fbd5e5;
+            border: none;
+            color: #333;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .filter-button:hover {
+            background-color: #f8c1d8;
+        }
+    </style>
+</head>
+<body>
+    <!-- Inicio Menu vertical-->
+    <section id="sidebar" id="sidebar" style="box-shadow: 2px 0 5px rgba(0,0,0,0.1);">
+        <a href="#" class="brand"><img src="{% static 'HairStudiodos.png' %}" alt="Salon Logo"></a>
+        <ul class="side-menu">
+            <li><a href="#" class="activo"><i class='bx bxs-dashboard icon'></i>Menu</a></li>
+            <li class="divider">Menu</li>
+            
+            <li>
+                <a href="#"><i class='bx bxs-book-heart icon'></i>Agenda<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'menu' %}"> > Citas Agendadas</a></li>
+                    <li><a href="{% url 'servicios_inmediatos' %}"> > Servicios Inmediatos</a></li>
+                </ul>
+            </li>
+           
+            <li>
+                <a href="#"><i class='bx bx-list-ul icon'></i>Servicios<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_servicios' %}"> > Lista de Servicios</a></li>
+                    <li><a href=""> > Historial de Servicios</a></li>
+                </ul>
+            </li>
+           
+            <li>
+                <a href="#"><i class='bx bxs-group icon'></i>Clientes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_clientes' %}"> > Lista de Cliente</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class='bx bx-money icon'></i>Pagos<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'menu_pago' %}"> > Gestión de Pagos</a></li>
+                    <li><a href=""> > Historial de Pagos</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class='bx bx-file icon'></i>Reportes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#"> > Ventas</a></li>
+                    <li><a href="#"> > Servicios Populares</a></li>
+                    <li><a href="#"> > Rendimiento de Empleados</a></li>
+                    <li><a href="#"> > Análisis de Citas vs. Servicios Inmediatos</a></li>
+                </ul>
+            </li>
+
+
+            {% if user.usuario_administrador %}
+            <li class="divider">Seccion Administrador</li> 
+            <li>
+                <a href="#"><i class='bx bxs-cog icon'></i>Configuración<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#">Servicio</a></li>
+                    <li><a href="#">Empleado</a></li>
+                    <li><a href="#">Roles</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class='bx bx-id-card icon'></i>Empleados<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_empleados' %}"> > Lista de Empleados</a></li>
+                    <li><a href=""> > Gestión de Horarios</a></li>
+                </ul>
+            </li>
+            {% endif %}
+            
+        </ul>
+
+        <div class="ads">
+            <div class="wrapper">
+                <a href="{% url 'logout' %}" class="btn-upgrade">Cerrar Sesión</a>
+            </div>
+        </div>
+    </section>
+    <!-- Fin Menu vertical -->
+
+     <!-- Inicio Menu Horizontal y Contenido -->
+     <section id="content"> 
+        <nav>
+            <div class="">
+                
+            </div>
+            <div class="nav-icons">
+                <i class='bx bxs-bell nav-icon'></i>
+                <i class='bx bxs-user-circle nav-icon'></i>
+            </div>
+        </nav>
+
+
+        <!-- Contenido principal -->
+    <div class="main-content">
+        <div class="table-container">
+            <div class="search-and-filter">
+                <div class="top-row">
+                    <div class="left-section">
+                        <a href="{% url 'listar_clientes' %}" class="back-button">
+                            <i class='bx bx-arrow-back'></i>
+                            <span>Volver</span>
+                        </a>
+                        <h2 class="table-title">Historial de Servicios del Cliente: {{ cliente.nombre }} {{ cliente.apellido }}</h2>
+                    </div>
+                    <form action="{% url 'historial_cliente' cedula=cliente.cedula %}" method="GET" class="search-form" id="search-form">
+                        <input type="text" name="q" placeholder="Buscar..." value="{{ query }}">
+                        <button type="submit"><i class='bx bx-search'></i></button>
+                    </form>
+                </div>
+                <div class="filters-row">
+                    <div class="filter-container">
+                        <label for="filtro-estado" class="filter-label">Filtrar por:</label>
+                        <select name="estado" id="filtro-estado" class="filter-dropdown">
+                            <option value="">Todos los estados</option>
+                            <option value="pendiente" {% if estado_filtrado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                            <option value="programada" {% if estado_filtrado == 'programada' %}selected{% endif %}>Programada</option>
+                            <option value="cancelada" {% if estado_filtrado == 'cancelada' %}selected{% endif %}>Cancelada</option>
+                            <option value="pagada" {% if estado_filtrado == 'pagada' %}selected{% endif %}>Pagada</option>
+                        </select>
+                    </div>
+                    <div class="filter-container">
+                        <label for="fecha-desde" class="filter-label">Desde:</label>
+                        <input type="text" name="fecha_desde" id="fecha-desde" class="filter-input" placeholder="dd/mm/aaaa" value="{{ fecha_desde }}" maxlength="10">
+                    </div>
+                    <div class="filter-container">
+                        <label for="fecha-hasta" class="filter-label">Hasta:</label>
+                        <input type="text" name="fecha_hasta" id="fecha-hasta" class="filter-input" placeholder="dd/mm/aaaa" value="{{ fecha_hasta }}" maxlength="10">
+                    </div>
+                    <div class="filter-container">
+                        <label for="empleado-filter" class="filter-label">Empleado:</label>
+                        <select name="empleado" id="empleado-filter" class="filter-dropdown">
+                            <option value="">Todos</option>
+                            {% for empleado in empleados %}
+                                <option value="{{ empleado.idusuario }}" {% if empleado_filtrado|stringformat:"s" == empleado.idusuario|stringformat:"s" %}selected{% endif %}>
+                                    {{ empleado.nombre }} {{ empleado.apellido }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-container">
+                        <button id="aplicar-fechas" class="filter-button">Aplicar Filtros</button>
+                    </div>
+                    <div class="filter-container">
+                        <button id="limpiar-filtros" class="filter-button">Limpiar filtros</button>
+                    </div>
+                </div>
+            </div>
+                <table id="historial-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Servicios</th>
+                            <th>Recepcionista</th>
+                            <th>Precio Total</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cita in citas %}
+                        <tr>
+                            <td>{{ cita.fecha|date:"d/m/Y" }}</td>
+                            <td>{{ cita.hora_inicio|time:"H:i" }}</td>
+                            <td>{{ cita.servicios }}</td>
+                            <td>{{ cita.empleado|default:"No especificado" }}</td>
+                            <td>{{ cita.precio_total|floatformat:0 }} Gs.</td>
+                            <td>{{ cita.estado|title }}</td>
+                            <td>
+                                <button class="ver-detalles" data-cita-id="{{ cita.idcita }}">Ver</button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7">No hay citas registradas para este cliente.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal para mostrar detalles de servicios -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalles de Servicios</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="modal-table">
+                    <thead>
+                        <tr>
+                            <th>Servicio</th>
+                            <th>Duración</th>
+                            <th>Precio</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-servicios">
+                        <!-- Los detalles de los servicios se cargarán aquí dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+   </section>
+   <!-- Fin Menu Horizontal -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "preventDuplicates": true,
+                "newestOnTop": false,
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+            
+            {% if messages %}
+                {% for message in messages %}
+                    toastr.{{ message.tags }}('{{ message|escapejs }}');
+                {% endfor %}
+            {% endif %}
+
+           // Función para realizar la búsqueda y filtrado en tiempo real
+           function performSearchAndFilter() {
+               var query = $('input[name="q"]').val().toLowerCase();
+               var estado = $('#estado-filter').val().toLowerCase();
+               
+               $('#historial-table tbody tr').each(function() {
+                   var row = $(this);
+                   var text = row.text().toLowerCase();
+                   var rowEstado = row.find('td:last').text().toLowerCase();
+                   
+                   if ((text.indexOf(query) === -1) || (estado && rowEstado !== estado)) {
+                       row.hide();
+                   } else {
+                       row.show();
+                   }
+               });
+           }
+
+           // Eventos para búsqueda y filtrado
+           $('input[name="q"]').on('input', performSearchAndFilter);
+           $('#estado-filter').on('change', performSearchAndFilter);
+
+           // Envío del formulario para búsqueda del lado del servidor
+           $('#search-form').on('submit', function(e) {
+               e.preventDefault();
+               var query = $('input[name="q"]').val();
+               var estado = $('#estado-filter').val();
+               window.location.href = "{% url 'historial_cliente' cedula=cliente.cedula %}?q=" + encodeURIComponent(query) + "&estado=" + encodeURIComponent(estado);
+           });
+
+           // Realizar búsqueda y filtrado inicial si hay una consulta o estado seleccionado
+           if($('input[name="q"]').val() || $('#estado-filter').val()) {
+               performSearchAndFilter();
+           }
+       });
+        // Función para obtener el token CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Obtener el token CSRF
+        const csrftoken = getCookie('csrftoken');
+        document.addEventListener('DOMContentLoaded', function() {
+            const estadoFilter = document.getElementById('filtro-estado');
+            const fechaDesde = document.getElementById('fecha-desde');
+            const fechaHasta = document.getElementById('fecha-hasta');
+            const empleadoFilter = document.getElementById('empleado-filter');
+            const searchForm = document.getElementById('search-form');
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalClose = document.querySelector('.modal-close');
+            const modalServicios = document.getElementById('modal-servicios');
+           
+            function formatearFechaAlEscribir(input) {
+                input.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '').substring(0,8);
+                    let formattedValue = '';
+                    
+                    if (value.length > 0) {
+                        formattedValue = value.substring(0,2);
+                    }
+                    if (value.length > 2) {
+                        formattedValue += '/' + value.substring(2,4);
+                    }
+                    if (value.length > 4) {
+                        formattedValue += '/' + value.substring(4,8);
+                    }
+                    
+                    e.target.value = formattedValue;
+                });
+            }
+
+            function validarFecha(input) {
+                const fecha = input.value;
+                const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+                if (regex.test(fecha)) {
+                    const [, dia, mes, anio] = regex.exec(fecha);
+                    const fechaObj = new Date(anio, mes - 1, dia);
+                    return fechaObj.getDate() == dia && 
+                        fechaObj.getMonth() == mes - 1 && 
+                        fechaObj.getFullYear() == anio;
+                }
+                return false;
+            }
+
+            function aplicarFiltros() {
+            const estado = estadoFilter.value;
+            const desde = fechaDesde.value;
+            const hasta = fechaHasta.value;
+            const empleado = empleadoFilter.value;
+            const query = document.querySelector('input[name="q"]').value;
+
+            const url = new URL(window.location);
+            const params = new URLSearchParams(url.search);
+
+            if (estado) params.set('estado', estado);
+            else params.delete('estado');
+
+            if (desde && validarFecha(fechaDesde)) params.set('fecha_desde', desde);
+            else params.delete('fecha_desde');
+
+            if (hasta && validarFecha(fechaHasta)) params.set('fecha_hasta', hasta);
+            else params.delete('fecha_hasta');
+
+            if (empleado) params.set('empleado', empleado);
+            else params.delete('empleado');
+
+            if (query) params.set('q', query);
+            else params.delete('q');
+
+            url.search = params.toString();
+            window.location.href = url.toString();
+            }
+
+            formatearFechaAlEscribir(fechaDesde);
+            formatearFechaAlEscribir(fechaHasta);
+
+            const aplicarFechasBtn = document.getElementById('aplicar-fechas');
+            aplicarFechasBtn.addEventListener('click', function() {
+                if ((fechaDesde.value === '' || validarFecha(fechaDesde)) &&
+                    (fechaHasta.value === '' || validarFecha(fechaHasta))) {
+                    aplicarFiltros();
+                } else {
+                    alert('Por favor, ingrese fechas válidas en el formato dd/mm/aaaa');
+                }
+            });
+
+            const limpiarFiltrosBtn = document.getElementById('limpiar-filtros');
+                limpiarFiltrosBtn.addEventListener('click', function() {
+                    // Limpiar los campos de filtro
+                    fechaDesde.value = '';
+                    fechaHasta.value = '';
+                    estadoFilter.value = '';
+                    empleadoFilter.value = '';
+                    document.querySelector('input[name="q"]').value = '';
+
+                    // Aplicar los filtros (que ahora están vacíos)
+                    aplicarFiltros();
+                });
+            function mostrarDetallesServicio(citaId) {
+                fetch(`/obtener-servicios-cita/${citaId}/`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            const modalServicios = document.getElementById('modal-servicios');
+                            modalServicios.innerHTML = '';
+                            if (data.servicios && data.servicios.length > 0) {
+                                data.servicios.forEach(servicio => {
+                                    const fila = document.createElement('tr');
+                                    fila.innerHTML = `
+                                        <td>${servicio.descripcion}</td>
+                                        <td>${servicio.duracion} minutos</td>
+                                        <td>${servicio.costo.toLocaleString('es-PY', { style: 'currency', currency: 'PYG' })}</td>
+                                    `;
+                                    modalServicios.appendChild(fila);
+                                });
+                            } else {
+                                modalServicios.innerHTML = `
+                                    <tr>
+                                        <td colspan="3" class="text-center">No hay servicios registrados para esta cita</td>
+                                    </tr>
+                                `;
+                            }
+                        } else {
+                            throw new Error(data.error || 'Error desconocido al cargar los servicios');
+                        }
+                        document.getElementById('modal-overlay').style.display = 'flex';
+                    })
+                    .catch(error => {
+                        console.error('Error al obtener los servicios:', error);
+                        const modalServicios = document.getElementById('modal-servicios');
+                        modalServicios.innerHTML = `
+                            <tr>
+                                <td colspan="3" class="error-message">Error al cargar los servicios: ${error.message}</td>
+                            </tr>
+                        `;
+                        document.getElementById('modal-overlay').style.display = 'flex';
+                    });
+            }
+
+            document.querySelectorAll('.ver-detalles').forEach(button => {
+                button.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const citaId = this.getAttribute('data-cita-id');
+                    mostrarDetallesServicio(citaId);
+                });
+            });
+
+            modalClose.addEventListener('click', () => {
+                modalOverlay.style.display = 'none';
+            });
+
+            modalOverlay.addEventListener('click', function(event) {
+                if (event.target === modalOverlay) {
+                    modalOverlay.style.display = 'none';
+                }
+            });
+
+            // Configuración de toastr
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "5000"
+            };
+        });
+   </script>
+    <!-- Cargar el archivo de scripts JS -->
+    <script src="{% static 'script.js' %}"></script>
+</body>
+</html>

@@ -30,4 +30,9 @@ urlpatterns = [
     path('empleados/editar/<int:idusuario>/', views.editar_empleado, name='editar_empleado'),
     path('empleados/eliminar/<int:idusuario>/', views.eliminar_empleado, name='eliminar_empleado'),
     path('acceso-denegado/', views.acceso_denegado, name='acceso_denegado'),
+    path('empleado/<int:idusuario>/horario/', views.listar_horario_empleado, name='listar_horario_empleado'),
+    path('guardar-horarios/', views.guardar_horarios, name='guardar_horarios'),
+    path('api/tipos-permiso/', views.api_tipos_permiso, name='api_tipos_permiso'),
+    path('guardar-permiso/', views.guardar_permiso, name='guardar_permiso'),
+
 ]

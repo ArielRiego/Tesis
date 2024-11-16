@@ -1,0 +1,994 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="x-uac-compatible" content="IE-edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+        <link rel="stylesheet" href="{% static 'agregar_servicio.css' %}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+        
+        <title>Salon de belleza - Gestión de Horarios</title>
+    
+        <style>
+            /* Estilos existentes sin cambios */
+            #content nav {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1rem;
+                background-color: #f8f9fa;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+    
+            .sliding-panel {
+                position: fixed;
+                top: 0;
+                right: -400px;
+                width: 400px;
+                height: 100vh;
+                background-color: #fff;
+                box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+                transition: right 0.3s ease-in-out;
+                z-index: 1000;
+                overflow-y: auto;
+            }
+    
+            .sliding-panel.open {
+                right: 0;
+            }
+    
+            .close-panel {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                font-size: 24px;
+                cursor: pointer;
+            }
+    
+            a {
+                text-decoration: none;
+            }
+    
+            /* Nuevos estilos para la gestión de horarios */
+            .horario-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .dia-horario {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .dia-nombre {
+            width: 120px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .horas-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-grow: 1;
+        }
+
+        .tiempo-trabajo {
+            color: #666;
+            font-size: 0.9rem;
+            margin-left: 0.5rem;
+        }
+
+        .horario-select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 120px;
+        }
+
+        .horario-select:disabled {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+        }
+
+        .btn-eliminar {
+            background: none;
+            border: none;
+            color: #ff4444;
+            cursor: pointer;
+            padding: 0.5rem;
+            margin-left: 1rem;
+        }
+
+        .btn-eliminar:hover {
+            color: #cc0000;
+        }
+
+        .btn-guardar {
+            display: block;
+            width: 200px;
+            margin: 2rem auto 0;
+            padding: 0.75rem 1.5rem;
+            background-color: #fbd5e5;
+            border: none;
+            border-radius: 4px;
+            color: #333;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-guardar:hover {
+            background-color: #f8c1d8;
+        }
+
+        .checkbox-dia {
+            width: 18px;
+            height: 18px;
+            margin-right: 0.5rem;
+        }
+
+        .employee-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .employee-name {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .employee-name .label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .employee-name .value {
+            color: #666;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn-guardar {
+            min-width: 150px;
+        }
+        .btn-permisos {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: #fbd5e5;
+            border: none;
+            border-radius: 4px;
+            color: #333;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        .btn-permisos:hover {
+            background-color: #f8c1d8;
+        }
+
+        .btn-permisos:active {
+            transform: scale(0.98);
+        }
+
+        .btn-permisos i {
+            font-size: 1.2rem;
+        }
+
+        /* Modal para permisos gestion */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: #fff;
+            margin: 50px auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .caracteres-contador {
+            display: block;
+            text-align: right;
+            color: #666;
+        }
+
+        .btn-cancelar {
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-cancelar:hover {
+            background-color: #e0e0e0;
+        }   
+        </style>
+    </head>
+<body>
+    <!-- Inicio Menu vertical-->
+    <section id="sidebar" id="sidebar" style="box-shadow: 2px 0 5px rgba(0,0,0,0.1);">
+        <a href="#" class="brand"><img src="{% static 'HairStudiodos.png' %}" alt="Salon Logo"></a>
+        <ul class="side-menu">
+            <li><a href="#" class="activo"><i class='bx bxs-dashboard icon'></i>Menu</a></li>
+            <li class="divider">Menu</li>
+            
+            <li>
+                <a href="#"><i class='bx bxs-book-heart icon'></i>Agenda<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'menu' %}"> > Citas Agendadas</a></li>
+                    <li><a href="{% url 'servicios_inmediatos' %}"> > Servicios Inmediatos</a></li>
+                </ul>
+            </li>
+           
+            <li>
+                <a href="#"><i class='bx bx-list-ul icon'></i>Servicios<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_servicios' %}"> > Lista de Servicios</a></li>
+                    <li><a href=""> > Historial de Servicios</a></li>
+                </ul>
+            </li>
+           
+            <li>
+                <a href="#"><i class='bx bxs-group icon'></i>Clientes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_clientes' %}"> > Lista de Cliente</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class='bx bx-money icon'></i>Pagos<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'menu_pago' %}"> > Gestión de Pagos</a></li>
+                    <li><a href=""> > Historial de Pagos</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class='bx bx-file icon'></i>Reportes<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#"> > Ventas</a></li>
+                    <li><a href="#"> > Servicios Populares</a></li>
+                    <li><a href="#"> > Rendimiento de Empleados</a></li>
+                    <li><a href="#"> > Análisis de Citas vs. Servicios Inmediatos</a></li>
+                </ul>
+            </li>
+
+
+            {% if user.usuario_administrador %}
+            <li class="divider">Seccion Administrador</li> 
+            <li>
+                <a href="#"><i class='bx bxs-cog icon'></i>Configuración<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="#">Servicio</a></li>
+                    <li><a href="#">Empleado</a></li>
+                    <li><a href="#">Roles</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#"><i class='bx bx-id-card icon'></i>Empleados<i class='bx bxs-chevron-right icon-right'></i></a>
+                <ul class="side-dropdown">
+                    <li><a href="{% url 'listar_empleados' %}"> > Lista de Empleados</a></li>
+                    <li><a href=""> > Gestión de Horarios</a></li>
+                </ul>
+            </li>
+            {% endif %}
+            
+        </ul>
+
+        <div class="ads">
+            <div class="wrapper">
+                <a href="{% url 'logout' %}" class="btn-upgrade">Cerrar Sesión</a>
+            </div>
+        </div>
+    </section>
+    <!-- Fin Menu vertical -->
+
+    <!-- Inicio Menu Horizontal -->
+     <section id="content"> 
+        
+        <nav>
+            <div class="">
+                    
+            </div>
+            <div class="nav-icons">
+                <i class='bx bxs-bell nav-icon'></i>
+                <i class='bx bxs-user-circle nav-icon'></i>
+            </div>
+        </nav>
+
+        <!-- Nuevo contenido para la gestión de horarios -->
+        <div class="main-content">
+            <div class="content-container">
+                <div class="horario-container">
+                    <h2 class="content-title">Gestión de Horarios</h2>
+                    <div class="employee-info">
+                        <div class="employee-name">
+                            <span class="label">Empleado:</span>
+                            <span class="value">{{ empleado.nombre }} {{ empleado.apellido }}</span>
+                        </div>
+                        <button class="btn-permisos">
+                            <i class='bx bx-calendar-exclamation'></i>
+                            Gestionar Permisos
+                        </button>
+                    </div>
+                    
+                    <div class="dias-container">
+                        <!-- Lunes -->
+                        <div class="dia-horario">
+                            <div class="dia-nombre">
+                                <input type="checkbox" class="checkbox-dia" id="lunes-check">
+                                <label for="lunes-check">Lunes</label>
+                            </div>
+                            <div class="horas-container">
+                                <select class="horario-select" id="lunes-inicio" disabled>
+                                    {% for hora in ""|rjust:"24" %}
+                                    <option value="{{ forloop.counter0 }}:00">{{ forloop.counter0 }}:00</option>
+                                    <option value="{{ forloop.counter0 }}:30">{{ forloop.counter0 }}:30</option>
+                                    {% endfor %}
+                                </select>
+                                <span>-</span>
+                                <select class="horario-select" id="lunes-fin" disabled>
+                                    {% for hora in ""|rjust:"24" %}
+                                    <option value="{{ forloop.counter0 }}:00">{{ forloop.counter0 }}:00</option>
+                                    <option value="{{ forloop.counter0 }}:30">{{ forloop.counter0 }}:30</option>
+                                    {% endfor %}
+                                </select>
+                                <button class="btn-eliminar" title="Limpiar horario">
+                                    <i class='bx bx-trash'></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Martes -->
+                        <div class="dia-horario">
+                            <div class="dia-nombre">
+                                <input type="checkbox" class="checkbox-dia" id="martes-check">
+                                <label for="martes-check">Martes</label>
+                            </div>
+                            <div class="horas-container">
+                                <select class="horario-select" id="martes-inicio" disabled>
+                                    {% for hora in ""|rjust:"24" %}
+                                    <option value="{{ forloop.counter0 }}:00">{{ forloop.counter0 }}:00</option>
+                                    <option value="{{ forloop.counter0 }}:30">{{ forloop.counter0 }}:30</option>
+                                    {% endfor %}
+                                </select>
+                                <span>-</span>
+                                <select class="horario-select" id="martes-fin" disabled>
+                                    {% for hora in ""|rjust:"24" %}
+                                    <option value="{{ forloop.counter0 }}:00">{{ forloop.counter0 }}:00</option>
+                                    <option value="{{ forloop.counter0 }}:30">{{ forloop.counter0 }}:30</option>
+                                    {% endfor %}
+                                </select>
+                                <button class="btn-eliminar" title="Limpiar horario">
+                                    <i class='bx bx-trash'></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Miércoles -->
+                        <div class="dia-horario">
+                            <div class="dia-nombre">
+                                <input type="checkbox" class="checkbox-dia" id="miercoles-check">
+                                <label for="miercoles-check">Miércoles</label>
+                            </div>
+                            <div class="horas-container">
+                                <select class="horario-select" id="miercoles-inicio" disabled>
+                                    {% for hora in ""|rjust:"24" %}
+                                    <option value="{{ forloop.counter0 }}:00">{{ forloop.counter0 }}:00</option>
+                                    <option value="{{ forloop.counter0 }}:30">{{ forloop.counter0 }}:30</option>
+                                    {% endfor %}
+                                </select>
+                                <span>-</span>
+                                <select class="horario-select" id="miercoles-fin" disabled>
+                                    {% for hora in ""|rjust:"24" %}
+                                    <option value="{{ forloop.counter0 }}:00">{{ forloop.counter0 }}:00</option>
+                                    <option value="{{ forloop.counter0 }}:30">{{ forloop.counter0 }}:30</option>
+                                    {% endfor %}
+                                </select>
+                                <button class="btn-eliminar" title="Limpiar horario">
+                                    <i class='bx bx-trash'></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Jueves -->
+                        <div class="dia-horario">
+                            <div class="dia-nombre">
+                                <input type="checkbox" class="checkbox-dia" id="jueves-check">
+                                <label for="jueves-check">Jueves</label>
+                            </div>
+                            <div class="horas-container">
+                                <select class="horario-select" id="jueves-inicio" disabled>
+                                    {% for hora in ""|rjust:"24" %}
+                                    <option value="{{ forloop.counter0 }}:00">{{ forloop.counter0 }}:00</option>
+                                    <option value="{{ forloop.counter0 }}:30">{{ forloop.counter0 }}:30</option>
+                                    {% endfor %}
+                                </select>
+                                <span>-</span>
+                                <select class="horario-select" id="jueves-fin" disabled>
+                                    {% for hora in ""|rjust:"24" %}
+                                    <option value="{{ forloop.counter0 }}:00">{{ forloop.counter0 }}:00</option>
+                                    <option value="{{ forloop.counter0 }}:30">{{ forloop.counter0 }}:30</option>
+                                    {% endfor %}
+                                </select>
+                                <button class="btn-eliminar" title="Limpiar horario">
+                                    <i class='bx bx-trash'></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Viernes -->
+                        <div class="dia-horario">
+                            <div class="dia-nombre">
+                                <input type="checkbox" class="checkbox-dia" id="viernes-check">
+                                <label for="viernes-check">Viernes</label>
+                            </div>
+                            <div class="horas-container">
+                                <select class="horario-select" id="viernes-inicio" disabled>
+                                    {% for hora in ""|rjust:"24" %}
+                                    <option value="{{ forloop.counter0 }}:00">{{ forloop.counter0 }}:00</option>
+                                    <option value="{{ forloop.counter0 }}:30">{{ forloop.counter0 }}:30</option>
+                                    {% endfor %}
+                                </select>
+                                <span>-</span>
+                                <select class="horario-select" id="viernes-fin" disabled>
+                                    {% for hora in ""|rjust:"24" %}
+                                    <option value="{{ forloop.counter0 }}:00">{{ forloop.counter0 }}:00</option>
+                                    <option value="{{ forloop.counter0 }}:30">{{ forloop.counter0 }}:30</option>
+                                    {% endfor %}
+                                </select>
+                                <button class="btn-eliminar" title="Limpiar horario">
+                                    <i class='bx bx-trash'></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Sábado -->
+                        <div class="dia-horario">
+                            <div class="dia-nombre">
+                                <input type="checkbox" class="checkbox-dia" id="sabado-check">
+                                <label for="sabado-check">Sábado</label>
+                            </div>
+                            <div class="horas-container">
+                                <select class="horario-select" id="sabado-inicio" disabled>
+                                    {% for hora in ""|rjust:"24" %}
+                                    <option value="{{ forloop.counter0 }}:00">{{ forloop.counter0 }}:00</option>
+                                    <option value="{{ forloop.counter0 }}:30">{{ forloop.counter0 }}:30</option>
+                                    {% endfor %}
+                                </select>
+                                <span>-</span>
+                                <select class="horario-select" id="sabado-fin" disabled>
+                                    {% for hora in ""|rjust:"24" %}
+                                    <option value="{{ forloop.counter0 }}:00">{{ forloop.counter0 }}:00</option>
+                                    <option value="{{ forloop.counter0 }}:30">{{ forloop.counter0 }}:30</option>
+                                    {% endfor %}
+                                </select>
+                                <button class="btn-eliminar" title="Limpiar horario">
+                                    <i class='bx bx-trash'></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Domingo -->
+                        <div class="dia-horario">
+                            <div class="dia-nombre">
+                                <input type="checkbox" class="checkbox-dia" id="domingo-check">
+                                <label for="domingo-check">Domingo</label>
+                            </div>
+                            <div class="horas-container">
+                                <select class="horario-select" id="domingo-inicio" disabled>
+                                    {% for hora in ""|rjust:"24" %}
+                                    <option value="{{ forloop.counter0 }}:00">{{ forloop.counter0 }}:00</option>
+                                    <option value="{{ forloop.counter0 }}:30">{{ forloop.counter0 }}:30</option>
+                                    {% endfor %}
+                                </select>
+                                <span>-</span>
+                                <select class="horario-select" id="domingo-fin" disabled>
+                                    {% for hora in ""|rjust:"24" %}
+                                    <option value="{{ forloop.counter0 }}:00">{{ forloop.counter0 }}:00</option>
+                                    <option value="{{ forloop.counter0 }}:30">{{ forloop.counter0 }}:30</option>
+                                    {% endfor %}
+                                </select>
+                                <button class="btn-eliminar" title="Limpiar horario">
+                                    <i class='bx bx-trash'></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="button-container">
+                        <button class="btn-guardar">Guardar Cambios</button>
+                        <a href="javascript:history.back()" class="btn-guardar">Atrás</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Modal de Permisos -->
+    <div id="modal-permisos" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Añadir días libres</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="tipo-permiso">Tipo</label>
+                    <select class="form-control" id="tipo-permiso">
+                        <option value="">Seleccionar tipo</option>
+                        {% for tipo in tipos_permiso %}
+                        <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div id="fecha-titulo" class="form-group">
+                    <h4>Fecha</h4>
+                </div>
+                <div class="form-group fecha-grupo">
+                    <label for="fecha-inicio">Fecha de inicio</label>
+                    <input type="date" class="form-control" id="fecha-inicio">
+                </div>
+                <div class="form-group fecha-grupo">
+                    <label for="fecha-fin">Fecha de fin</label>
+                    <input type="date" class="form-control" id="fecha-fin">
+                </div>
+                <div id="hora-titulo" class="form-group">
+                    <h4>Hora</h4>
+                </div>
+                <div class="form-row hora-grupo">
+                    <div class="form-group col-md-6">
+                        <label for="hora-inicio">Hora de Entrada</label>
+                        <input type="time" class="form-control" id="hora-inicio">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="hora-fin">Hora de Salida</label>
+                        <input type="time" class="form-control" id="hora-fin">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea class="form-control" id="descripcion" placeholder="Añadir descripción o comentario (opcional)"></textarea>
+                    <small class="text-muted caracteres-contador">0/100</small>
+                </div>
+                {% if user.usuario_administrador %}
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="aprobado">
+                    <label class="form-check-label" for="aprobado">Aprobado</label>
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-guardar" onclick="guardarPermiso()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    
+    <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+                const diasMap = {
+                    'lunes': 1, 'martes': 2, 'miercoles': 3, 'jueves': 4, 'viernes': 5, 'sabado': 6, 'domingo': 7
+                };
+                
+            // Función para mantener el formato original de la hora
+            function mantenerFormatoHora(hora) {
+                if (!hora || hora === '0:00') return "0:00";
+                return hora; // Mantiene el formato original, ya sea 'H:MM' o 'HH:MM'
+            }
+            
+            // Cargar los horarios guardados
+            const horariosGuardados = JSON.parse('{{ horarios_json|safe }}');
+            
+            function compararHoras(hora1, hora2) {
+                const [h1, m1] = hora1.split(':').map(Number);
+                const [h2, m2] = hora2.split(':').map(Number);
+                return h1 * 60 + m1 - (h2 * 60 + m2);
+            }
+            horariosGuardados.forEach((horario) => {
+                const dia = dias[horario.dia - 1];
+                const checkbox = document.getElementById(`${dia}-check`);
+                const selectInicio = document.getElementById(`${dia}-inicio`);
+                const selectFin = document.getElementById(`${dia}-fin`);
+                
+                if (horario.trabaja) {
+                    checkbox.checked = true;
+                    selectInicio.disabled = false;
+                    selectFin.disabled = false;
+                    selectInicio.value = mantenerFormatoHora(horario.hora_inicio);
+                    selectFin.value = mantenerFormatoHora(horario.hora_fin);
+                } else {
+                    checkbox.checked = false;
+                    selectInicio.disabled = true;
+                    selectFin.disabled = true;
+                    selectInicio.value = "0:00";
+                    selectFin.value = "0:00";
+                }
+            });
+
+            // Función de ayuda para depuración
+            function logHorarios() {
+                console.log('Horarios guardados:', horariosGuardados);
+                dias.forEach(dia => {
+                    const checkbox = document.getElementById(`${dia}-check`);
+                    const selectInicio = document.getElementById(`${dia}-inicio`);
+                    const selectFin = document.getElementById(`${dia}-fin`);
+                    console.log(`${dia}:`, {
+                        checked: checkbox.checked,
+                        inicio: selectInicio.value,
+                        fin: selectFin.value
+                    });
+                });
+            }
+
+            // Llamar a la función de depuración después de cargar los horarios
+            logHorarios();
+
+                dias.forEach(dia => {
+                    const checkbox = document.getElementById(`${dia}-check`);
+                    const selectInicio = document.getElementById(`${dia}-inicio`);
+                    const selectFin = document.getElementById(`${dia}-fin`);
+                    const btnEliminar = selectFin.parentElement.querySelector('.btn-eliminar');
+                    
+                    checkbox.addEventListener('change', function() {
+                        selectInicio.disabled = !this.checked;
+                        selectFin.disabled = !this.checked;
+                        
+                        if (this.checked && selectInicio.value === "0:00") {
+                            selectInicio.value = "8:00";
+                            selectFin.value = "19:00";
+                        }
+                    });
+                    
+                    selectInicio.addEventListener('change', function() {
+                        if (compararHoras(selectFin.value, this.value) < 0) {
+                            toastr.error('La hora de fin no puede ser menor a la hora de inicio');
+                            this.value = selectFin.value;
+                        }
+                    });
+
+                    selectFin.addEventListener('change', function() {
+                        if (compararHoras(this.value, selectInicio.value) < 0) {
+                            toastr.error('La hora de fin no puede ser menor a la hora de inicio');
+                            this.value = selectInicio.value;
+                        }
+                    });
+                    btnEliminar.addEventListener('click', function() {
+                        checkbox.checked = false;
+                        selectInicio.disabled = true;
+                        selectFin.disabled = true;
+                        selectInicio.value = "0:00";
+                        selectFin.value = "0:00";
+                    });
+                });
+
+                document.querySelector('.btn-guardar').addEventListener('click', function() {
+                    const horarios = {};
+                    
+                    dias.forEach(dia => {
+                        const checkbox = document.getElementById(`${dia}-check`);
+                        if (checkbox.checked) {
+                            horarios[diasMap[dia]] = {
+                                inicio: document.getElementById(`${dia}-inicio`).value,
+                                fin: document.getElementById(`${dia}-fin`).value
+                            };
+                        }
+                    });
+
+                    fetch('{% url "guardar_horarios" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            empleado_id: {{ empleado.idusuario }},
+                            horarios: horarios
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            toastr.success(data.message);
+                        } else {
+                            toastr.error(data.message || 'Error al guardar los horarios');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        toastr.error('Error al guardar los horarios');
+                    });
+                });
+
+                function getCookie(name) {
+                    let cookieValue = null;
+                    if (document.cookie && document.cookie !== '') {
+                        const cookies = document.cookie.split(';');
+                        for (let i = 0; i < cookies.length; i++) {
+                            const cookie = cookies[i].trim();
+                            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                break;
+                            }
+                        }
+                    }
+                    return cookieValue;
+                }
+            });
+
+
+            // Funcionalidad del modal de permisos
+            const modalPermisos = document.getElementById('modal-permisos');
+            const btnPermisos = document.querySelector('.btn-permisos');
+            const descripcionTextarea = document.getElementById('descripcion');
+            const selectTipoPermiso = document.getElementById('tipo-permiso');
+            const fechaTitulo = document.getElementById('fecha-titulo');
+            const horaTitulo = document.getElementById('hora-titulo');
+            const fechaGrupos = document.querySelectorAll('.fecha-grupo');
+            const horaGrupo = document.querySelector('.hora-grupo');
+            const horaInicio = document.getElementById('hora-inicio');
+            const horaFin = document.getElementById('hora-fin');
+
+            btnPermisos.addEventListener('click', () => {
+                modalPermisos.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                cargarTiposPermiso();
+            });
+
+            selectTipoPermiso.addEventListener('change', function() {
+                const selectedType = this.options[this.selectedIndex].text.toLowerCase();
+                
+                // Ocultar todos los campos y títulos
+                [fechaTitulo, horaTitulo, ...fechaGrupos, horaGrupo].forEach(el => {
+                    el.style.display = 'none';
+                });
+
+                // Mostrar campos según el tipo de permiso
+                if (selectedType === 'llegada tardía') {
+                    fechaTitulo.style.display = 'block';
+                    horaTitulo.style.display = 'block';
+                    fechaGrupos[0].style.display = 'block';
+                    horaGrupo.style.display = 'flex';
+                    horaInicio.parentElement.style.display = 'block';
+                    horaFin.parentElement.style.display = 'none';
+                } else if (selectedType === 'salida anticipada') {
+                    fechaTitulo.style.display = 'block';
+                    horaTitulo.style.display = 'block';
+                    fechaGrupos[0].style.display = 'block';
+                    horaGrupo.style.display = 'flex';
+                    horaInicio.parentElement.style.display = 'none';
+                    horaFin.parentElement.style.display = 'block';
+                } else {
+                    // Para otros tipos de permiso, mostrar solo los campos de fecha
+                    fechaTitulo.style.display = 'block';
+                    fechaGrupos.forEach(el => el.style.display = 'block');
+                    horaTitulo.style.display = 'none';
+                    horaGrupo.style.display = 'none';
+                }
+            });
+
+            function cerrarModal() {
+                modalPermisos.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                // Limpiar y resetear todos los campos
+                selectTipoPermiso.value = '';
+                [fechaTitulo, ...fechaGrupos].forEach(el => {
+                    el.style.display = 'block';
+                });
+                horaTitulo.style.display = 'none';
+                horaGrupo.style.display = 'none';
+                document.querySelectorAll('input[type="date"], input[type="time"]').forEach(el => {
+                    el.value = '';
+                });
+                descripcionTextarea.value = '';
+                document.getElementById('aprobado').checked = false;
+                document.querySelector('.caracteres-contador').textContent = '0/100';
+            }
+            modalPermisos.addEventListener('click', (e) => {
+                if (e.target === modalPermisos) {
+                    cerrarModal();
+                }
+            });
+
+            document.querySelector('.modal-close').addEventListener('click', cerrarModal);
+
+                // Agregar event listeners para cerrar el modal
+                document.querySelector('.modal-close').addEventListener('click', cerrarModal);
+                document.querySelector('.btn-cancelar').addEventListener('click', cerrarModal);
+                modalPermisos.addEventListener('click', (e) => {
+                    if (e.target === modalPermisos) {
+                        cerrarModal();
+                    }
+                });
+            modalPermisos.addEventListener('click', (e) => {
+                if (e.target === modalPermisos) {
+                    cerrarModal();
+                }
+            });
+
+        document.querySelector('.modal-close').addEventListener('click', cerrarModal);
+        document.querySelector('.btn-cancelar').addEventListener('click', cerrarModal);
+
+        descripcionTextarea.addEventListener('input', function() {
+            const contador = this.value.length;
+            const max = 100;
+            document.querySelector('.caracteres-contador').textContent = `${contador}/${max}`;
+            if (contador > max) {
+                this.value = this.value.substring(0, max);
+            }
+        });
+
+             // Función para cargar los tipos de permiso
+            function cargarTiposPermiso() {
+                fetch('/api/tipos-permiso/') // Asegúrate de que esta URL sea correcta
+                    .then(response => response.json())
+                    .then(data => {
+                        selectTipoPermiso.innerHTML = '<option value="">Seleccionar tipo</option>';
+                        data.forEach(tipo => {
+                            const option = document.createElement('option');
+                            option.value = tipo.id;
+                            option.textContent = tipo.nombre;
+                            selectTipoPermiso.appendChild(option);
+                        });
+                        console.log('Tipos de permiso cargados:', data);
+                    })
+                    .catch(error => {
+                        console.error('Error al cargar los tipos de permiso:', error);
+                    });
+            }
+            function guardarPermiso() {
+                const data = {
+                    tipo_permiso: document.getElementById('tipo-permiso').value,
+                    fecha_inicio: document.getElementById('fecha-inicio').value,
+                    fecha_fin: document.getElementById('fecha-fin').value,
+                    hora_inicio: document.getElementById('hora-inicio').value,
+                    hora_fin: document.getElementById('hora-fin').value,
+                    descripcion: document.getElementById('descripcion').value,
+                };
+
+                // Solo incluir 'aprobado' si el usuario es administrador
+                const aprobadoCheckbox = document.getElementById('aprobado');
+                if (aprobadoCheckbox) {
+                    data.aprobado = aprobadoCheckbox.checked;
+                }
+
+                fetch('{% url "guardar_permiso" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        toastr.success('Permiso guardado exitosamente');
+                        cerrarModal();
+                    } else {
+                        toastr.error(data.message || 'Error al guardar el permiso');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    toastr.error('Error al guardar el permiso');
+                });
+            }
+
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            document.querySelector('.modal-close').addEventListener('click', cerrarModal);
+            document.querySelector('.btn-cancelar').addEventListener('click', cerrarModal);
+                // Cerrar el modal si se hace clic fuera de él
+            window.addEventListener('click', function(event) {
+                if (event.target === modalPermisos) {
+                    cerrarModalPermisos();
+                }
+            });
+    </script>
+
+    <script src="{% static 'script.js' %}"></script>
+</body>
+</html>

@@ -12,8 +12,14 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction, connection
-from .models import Usuario, TipoUsuario
+from .models import Usuario, TipoUsuario, HorarioTrabajo,TipoPermiso,Ausencia 
 from .decorators import superuser_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+import json
+from datetime import datetime, time
+from django.utils import timezone
 
 
 logger = logging.getLogger(__name__)
@@ -111,6 +117,145 @@ def agregar_empleado(request):
     tipos_usuario = TipoUsuario.objects.all()
     return render(request, 'menu_agregar_empleado.html', {'tipos_usuario': tipos_usuario})
 
+@login_required
+@superuser_required
+def listar_horario_empleado(request, idusuario):
+    empleado = get_object_or_404(Usuario, idusuario=idusuario)
+    horarios = HorarioTrabajo.objects.filter(usuario=empleado).order_by('dia_semana')
+    
+    horarios_formateados = []
+    for dia in range(1, 8):  # 1 a 7 representando los días de la semana
+        horario = horarios.filter(dia_semana=dia).first()
+        if horario:
+            hora_inicio = horario.hora_inicio.strftime('%H:%M')
+            hora_fin = horario.hora_fin.strftime('%H:%M')
+            
+            # Mantener HH:MM para horas >= 10, y usar H:MM para horas < 10
+            hora_inicio = hora_inicio[1:] if hora_inicio.startswith('0') else hora_inicio
+            hora_fin = hora_fin[1:] if hora_fin.startswith('0') else hora_fin
+            
+            horarios_formateados.append({
+                'dia': dia,
+                'trabaja': True,
+                'hora_inicio': hora_inicio,
+                'hora_fin': hora_fin
+            })
+        else:
+            horarios_formateados.append({
+                'dia': dia,
+                'trabaja': False,
+                'hora_inicio': '0:00',
+                'hora_fin': '0:00'
+            })
+
+    context = {
+        'empleado': empleado,
+        'horarios_json': json.dumps(horarios_formateados)
+    }
+    return render(request, 'gestion_horarios.html', context)
+    
+def api_tipos_permiso(request):
+    tipos = TipoPermiso.objects.all().values('id', 'nombre')
+    return JsonResponse(list(tipos), safe=False)
+
+
+
+@csrf_exempt
+@require_POST
+def guardar_permiso(request):
+    try:
+        data = json.loads(request.body)
+        tipo_permiso_id = data.get('tipo_permiso')
+        fecha_inicio = data.get('fecha_inicio')
+        fecha_fin = data.get('fecha_fin')
+        hora_inicio = data.get('hora_inicio')
+        hora_fin = data.get('hora_fin')
+        descripcion = data.get('descripcion')
+        aprobado = data.get('aprobado', False)
+
+        # Validar que el tipo de permiso existe
+        try:
+            tipo_permiso = TipoPermiso.objects.get(id=tipo_permiso_id)
+        except TipoPermiso.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Tipo de permiso no válido'}, status=400)
+
+        # Convertir fechas y horas a objetos datetime conscientes de la zona horaria
+        tz = timezone.get_current_timezone()
+        fecha_inicio = timezone.make_aware(datetime.strptime(fecha_inicio, '%Y-%m-%d'), tz)
+        if fecha_fin:
+            fecha_fin = timezone.make_aware(datetime.strptime(fecha_fin, '%Y-%m-%d'), tz)
+        else:
+            fecha_fin = fecha_inicio
+
+        # Crear el objeto Ausencia
+        ausencia = Ausencia(
+            usuario=request.user,
+            id_tipo_permiso=tipo_permiso,
+            fecha_inicio=fecha_inicio,
+            fecha_fin=fecha_fin,
+            descripcion=descripcion,
+            motivo=descripcion[:255],  # Limitamos el motivo a 255 caracteres
+            aprobado=aprobado
+        )
+
+        # Manejar casos especiales según el tipo de permiso
+        if tipo_permiso.nombre.lower() == 'llegada tardía':
+            hora_inicio = datetime.strptime(hora_inicio, '%H:%M').time()
+            ausencia.fecha_inicio = timezone.make_aware(datetime.combine(fecha_inicio.date(), hora_inicio), tz)
+            ausencia.fecha_fin = timezone.make_aware(datetime.combine(fecha_inicio.date(), time(23, 59, 59)), tz)
+        elif tipo_permiso.nombre.lower() == 'salida anticipada':
+            hora_fin = datetime.strptime(hora_fin, '%H:%M').time()
+            ausencia.fecha_inicio = timezone.make_aware(datetime.combine(fecha_inicio.date(), time(0, 0)), tz)
+            ausencia.fecha_fin = timezone.make_aware(datetime.combine(fecha_inicio.date(), hora_fin), tz)
+        else:
+            # Para otros tipos de permiso, usar todo el día
+            ausencia.fecha_inicio = timezone.make_aware(datetime.combine(fecha_inicio.date(), time(0, 0)), tz)
+            ausencia.fecha_fin = timezone.make_aware(datetime.combine(fecha_fin.date(), time(23, 59, 59)), tz)
+
+        # Si el usuario actual es administrador, aprobar automáticamente
+        if request.user.usuario_administrador:
+            ausencia.aprobado = True
+            ausencia.aprobado_por = request.user
+
+        ausencia.save()
+
+        return JsonResponse({'success': True, 'message': 'Permiso guardado exitosamente'})
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'Datos inválidos'}, status=400)
+    except Exception as e:
+        # Loguear el error para debugging
+        import logging
+        logging.error(f"Error al guardar permiso: {str(e)}")
+        return JsonResponse({'success': False, 'message': 'Error interno del servidor'}, status=500)
+    
+
+@require_POST
+@csrf_exempt
+def guardar_horarios(request):
+    try:
+        data = json.loads(request.body)
+        empleado_id = data.get('empleado_id')
+        horarios = data.get('horarios')
+
+        empleado = Usuario.objects.get(idusuario=empleado_id)
+
+        # Eliminar horarios existentes
+        HorarioTrabajo.objects.filter(usuario=empleado).delete()
+
+        # Crear nuevos horarios
+        for dia, horas in horarios.items():
+            HorarioTrabajo.objects.create(
+                usuario=empleado,
+                dia_semana=dia,
+                hora_inicio=horas['inicio'],
+                hora_fin=horas['fin']
+            )
+
+        return JsonResponse({'success': True, 'message': 'Horarios guardados correctamente'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+    
 @login_required
 @superuser_required
 def listar_empleados(request):

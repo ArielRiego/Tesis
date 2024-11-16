@@ -9,10 +9,11 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="{% static 'style.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">   
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- FullCalendar CSS -->
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.css' rel='stylesheet' /> 
     <link rel="stylesheet" href="https://unpkg.com/tooltip.js/dist/tooltip.min.css">
@@ -207,7 +208,14 @@
             border: 1px solid #e0e0e0;
             color: black;
         }
+        .toast-success {
+            background-color: #51A351;
+        }
 
+        .toast {
+            font-size: 16px;
+            font-weight: bold;
+        }
         /* Toast Styles */
         .toastr-info-large {
             width: 350px !important;
@@ -574,30 +582,65 @@ $(document).ready(function() {
         $('#servicePrice').val(price);
     });
 
-    // Función para cargar los empleados (sin cambios)
     function cargarEmpleados() {
+        var fecha = $('#bookingDate').val();
+        var hora = $('#bookingTime').val();
+        var idServicio = $('#service').val();
+        
+        if (!fecha || !hora || !idServicio) {
+            console.log("Faltan datos para cargar empleados");
+            return;
+        }
+
         $.ajax({
             url: '{% url "obtener_empleados" %}',
             method: 'GET',
+            data: { 
+                fecha: fecha, 
+                hora: hora,
+                id_servicio: idServicio
+            },
             success: function(data) {
                 var select = $('#employee');
                 select.empty().append('<option value="">Seleccione un empleado</option>');
                 $.each(data.empleados, function(index, empleado) {
                     select.append($('<option></option>')
-                        .attr('value', empleado.idtipousuario)
+                        .attr('value', empleado.id)
                         .text(empleado.nombre + ' ' + empleado.apellido));
                 });
-                console.log("Empleados cargados:", data.empleados.length);
+                console.log("Empleados disponibles cargados:", data.empleados.length);
                 select.trigger('change');
             },
             error: function(error) {
                 console.error("Error al cargar empleados:", error);
-                toastr.error('Error al cargar empleados. Por favor, intente de nuevo.');
+                toastr.error('Error al cargar empleados disponibles. Por favor, intente de nuevo.');
             }
         });
     }
 
-    // Inicializar Select2 para la búsqueda de clientes, servicios y empleados (sin cambios)
+    // Evento para cargar empleados cuando se selecciona un servicio
+    $('#service').on('change', function() {
+        var selectedOption = $(this).find('option:selected');
+        var duration = selectedOption.data('duration');
+        var price = selectedOption.data('price');
+        
+        $('#serviceDuration').val(duration);
+        $('#servicePrice').val(price);
+
+        // Cargar empleados solo si se ha seleccionado un servicio y hay fecha y hora
+        if ($(this).val() && $('#bookingDate').val() && $('#bookingTime').val()) {
+            cargarEmpleados();
+        }
+    });
+
+    // Evento para cargar empleados cuando cambia la fecha o la hora
+    $('#bookingDate, #bookingTime').on('change', function() {
+        if ($('#service').val() && $('#bookingDate').val() && $('#bookingTime').val()) {
+            cargarEmpleados();
+        }
+    });
+
+    // Inicializar Select2 para la búsqueda de clientes, servicios y empleados
     $('#client, #service, #employee').select2({
         placeholder: 'Buscar...',
         allowClear: true,
@@ -609,15 +652,13 @@ $(document).ready(function() {
         minimumInputLength: 0
     });
 
-    // Cargar datos iniciales (sin cambios)
+    // Cargar datos iniciales
     cargarClientes();
     cargarServicios();
-    cargarEmpleados();
 
-    // Manejar clic en botón "Añadir Servicio" (sin cambios)
+    // Manejar clic en botón "Añadir Servicio"
     $('#addServiceBtn').on('click', function() {
         cargarServicios();
-        cargarEmpleados();
         $('#servicePanel').addClass('open');
     });
 

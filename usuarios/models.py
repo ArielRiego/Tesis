@@ -115,3 +115,45 @@ class UsuarioTipoUsuario(models.Model):
 
     def __str__(self):
         return f"{self.usuario.username} - {self.tipo_usuario.descripcion}"
+
+class HorarioTrabajo(models.Model):
+    id = models.AutoField(primary_key=True)
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, db_column='idusuario')
+    dia_semana = models.IntegerField()
+    hora_inicio = models.TimeField()
+    hora_fin = models.TimeField()
+
+    class Meta:
+        db_table = 'horario_trabajo'
+        managed = True if 'test' in sys.argv else False
+
+    def __str__(self):
+        return f"{self.usuario.username} - Día {self.dia_semana}: {self.hora_inicio} - {self.hora_fin}"
+
+class TipoPermiso(models.Model):
+    nombre = models.CharField(max_length=100)
+
+    class Meta:
+        db_table = 'tipo_permiso'
+        managed = True if 'test' in sys.argv else False
+
+    def __str__(self):
+        return self.nombre
+
+class Ausencia(models.Model):
+    id = models.AutoField(primary_key=True)
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, db_column='idusuario')
+    fecha_inicio = models.DateTimeField()
+    fecha_fin = models.DateTimeField()
+    motivo = models.CharField(max_length=255, null=True, blank=True)
+    id_tipo_permiso = models.ForeignKey(TipoPermiso, on_delete=models.SET_NULL, null=True, db_column='id_tipo_permiso')
+    aprobado_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, related_name='ausencias_aprobadas', db_column='aprobado_por')
+    aprobado = models.BooleanField(default=False)
+    descripcion = models.TextField(blank=True)
+
+    class Meta:
+        db_table = 'ausencias'
+        managed = True if 'test' in sys.argv else False
+
+    def __str__(self):
+        return f"{self.usuario.username} - {self.id_tipo_permiso} ({self.fecha_inicio} a {self.fecha_fin})"

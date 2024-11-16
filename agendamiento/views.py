@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from cliente.models import Cliente
 from servicios.models import Servicio
-from usuarios.models import Usuario, TipoUsuario, UsuarioTipoUsuario
+from usuarios.models import Usuario, TipoUsuario, UsuarioTipoUsuario, Ausencia, HorarioTrabajo
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -45,10 +45,80 @@ def obtener_servicios(request):
     data = [{'id': servicio.idservicio, 'descripcion': servicio.descripcion, 'duracion': servicio.duracion, 'costo': servicio.costo} for servicio in servicios]
     return JsonResponse({'servicios': data})
 
+logger = logging.getLogger(__name__)
+
 def obtener_empleados(request):
-    empleados = Usuario.objects.filter(usuario_administrador=False)
-    data = [{'id': empleado.idusuario, 'nombre': empleado.nombre, 'apellido': empleado.apellido} for empleado in empleados]
-    return JsonResponse({'empleados': data})
+    fecha = request.GET.get('fecha')
+    hora = request.GET.get('hora')
+    nombre_servicio = request.GET.get('id_servicio')
+    
+    logger.info(f"Parámetros recibidos: fecha={fecha}, hora={hora}, id_servicio={nombre_servicio}")
+
+    if not all([fecha, hora, nombre_servicio]):
+        logger.error("Faltan parámetros requeridos")
+        return JsonResponse({'error': 'Faltan parámetros requeridos'}, status=400)
+
+    try:
+        fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
+        hora_obj = datetime.strptime(hora, '%H:%M').time()
+        dia_semana = fecha_obj.isoweekday()
+        logger.info(f"Fecha procesada: {fecha_obj}, Hora: {hora_obj}, Día de la semana: {dia_semana}")
+
+        try:
+            servicio = Servicio.objects.get(descripcion=nombre_servicio)
+            id_servicio = servicio.idservicio
+            logger.info(f"Servicio encontrado: {nombre_servicio}, ID: {id_servicio}")
+        except Servicio.DoesNotExist:
+            logger.error(f"Servicio no encontrado: {nombre_servicio}")
+            return JsonResponse({'error': f'Servicio "{nombre_servicio}" no encontrado'}, status=404)
+
+        with connection.cursor() as cursor:
+            query = """
+            SELECT DISTINCT u.idusuario, u.nombre, u.apellido
+            FROM usuario u
+            JOIN usuario_tipo_usuario utu ON u.idusuario = utu.idusuario
+            JOIN tipo_usuario tu ON utu.idtipousuario = tu.idtipousuario
+            JOIN horario_trabajo ht ON u.idusuario = ht.idusuario
+            JOIN servicio_tipo_usuario stu ON tu.idtipousuario = stu.idtipousuario
+            LEFT JOIN ausencias a ON u.idusuario = a.idusuario
+            WHERE u.usuario_administrador = FALSE
+            AND ht.dia_semana = %s
+            AND ht.hora_inicio <= %s
+            AND ht.hora_fin >= %s
+            AND stu.idservicio = %s
+            AND (a.id IS NULL OR 
+                 a.fecha_inicio > %s OR 
+                 a.fecha_fin < %s OR 
+                 a.aprobado = FALSE)
+            """
+            params = [dia_semana, hora_obj, hora_obj, id_servicio, 
+                      datetime.combine(fecha_obj, hora_obj), 
+                      datetime.combine(fecha_obj, hora_obj)]
+            
+            logger.info(f"Ejecutando query: {query}")
+            logger.info(f"Parámetros de la query: {params}")
+            
+            cursor.execute(query, params)
+            empleados_disponibles = cursor.fetchall()
+
+        logger.info(f"Empleados disponibles encontrados: {len(empleados_disponibles)}")
+        for emp in empleados_disponibles:
+            logger.info(f"Empleado: ID={emp[0]}, Nombre={emp[1]}, Apellido={emp[2]}")
+        
+        data = [{'id': emp[0], 'nombre': emp[1], 'apellido': emp[2]} for emp in empleados_disponibles]
+        return JsonResponse({'empleados': data})
+
+    except ValueError as e:
+        logger.error(f"Error en el formato de los datos: {str(e)}")
+        return JsonResponse({'error': f'Error en el formato de los datos: {str(e)}'}, status=400)
+    except Exception as e:
+        logger.error(f"Error interno del servidor: {str(e)}", exc_info=True)
+        return JsonResponse({'error': f'Error interno del servidor: {str(e)}'}, status=500)
+
+#logica para empleaos y horario
+
+#fin logica
+
 
 def obtener_id_servicio(request):
     nombre_servicio = request.GET.get('nombre')
@@ -71,6 +141,7 @@ def obtener_id_empleado(request):
 
 logger = logging.getLogger(__name__)
 
+@login_required 
 @require_POST
 @csrf_exempt
 def agregar_servicio_inmediato(request):
@@ -95,7 +166,8 @@ def agregar_servicio_inmediato(request):
                 estado='En progreso',
                 tiempo_gracia=0,
                 precio_total=Decimal(sum(Decimal(str(servicio['costo'])) for servicio in data['servicios'])),
-                es_agendada=False
+                es_agendada=False,
+                idusuario=request.user,
             )
             
             # Crear los servicios asociados a la cita
@@ -153,6 +225,7 @@ def agregar_servicio_inmediato(request):
         logger.error(f"Unexpected error: {error_message}")
         return JsonResponse({'success': False, 'error': error_message})
     
+@login_required  
 @require_POST
 @csrf_exempt
 def agregar_cita(request):
@@ -176,7 +249,8 @@ def agregar_cita(request):
                 estado=data['estado'],
                 tiempo_gracia=data['tiempo_gracia'],
                 precio_total=Decimal(str(data['precio_total'])),
-                es_agendada=True
+                es_agendada=True,
+                idusuario=request.user,
             )
             
             # Crear los servicios asociados a la cita

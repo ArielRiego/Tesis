@@ -5,6 +5,7 @@ from dateutil.rrule import rrule, DAILY, WEEKLY, MONTHLY
 from datetime import timedelta
 from django.db import models
 from cliente.models import Cliente
+from django.conf import settings
 
 class Cita(models.Model):
     idcita = models.AutoField(primary_key=True)
@@ -16,6 +17,7 @@ class Cita(models.Model):
     tiempo_gracia = models.IntegerField()
     precio_total = models.DecimalField(max_digits=10, decimal_places=2)
     es_agendada = models.BooleanField(default=True)  # Nuevo campo
+    idusuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,db_column='idusuario')
 
     class Meta:
         managed = False  # Esto evita que Django intente crear o modificar la tabla

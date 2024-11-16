@@ -92,6 +92,9 @@
                             {% endfor %}
                         </select>
                     </div>
+                    <div class="form-group">
+                        <a href="{% url 'listar_horario_empleado' idusuario=usuario.idusuario %}" class="button button-secondary">Gestionar Horario</a>
+                    </div>
                     <div class="button-container">
                         <button type="submit" class="button button-primary">Guardar cambios</button>
                         <a href="{% url 'listar_empleados' %}" class="button button-secondary">Cancelar</a>

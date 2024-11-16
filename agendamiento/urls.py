@@ -15,4 +15,5 @@ urlpatterns = [
     path('servicios-inmediatos/', views.servicios_inmediatos, name='servicios_inmediatos'),
     path('agregar-servicio/', views.agregar_servicio_inmediato, name='agregar_servicio_inmediato'),
     path('confirmar-cita/', views.confirmar_cita, name='confirmar_cita'),
+
 ]

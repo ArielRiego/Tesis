@@ -215,7 +215,7 @@
                             <td>{{ cliente.ruc }}</td>
                             <td>{{ cliente.telefono }}</td>
                             <td>
-                                <a href="#" ><i class='bx bx-file'></i></a>
+                                <a href="{% url 'historial_cliente' cedula=cliente.cedula %}" ><i class='bx bx-file'></i></a>
                             </td>
                             <td>
                                 <a href="{% url 'editar_cliente' cedula=cliente.cedula %}"><i class='bx bxs-edit'></i></a>
